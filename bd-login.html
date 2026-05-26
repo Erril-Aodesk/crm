@@ -17,14 +17,6 @@ canvas{position:absolute;inset:0;opacity:.4;pointer-events:none;}
 .btext span{display:block;font-size:10px;font-weight:400;color:rgba(255,255,255,.35);letter-spacing:.07em;text-transform:uppercase;margin-top:2px;}
 h1{font-family:'Syne',sans-serif;font-weight:800;font-size:26px;color:white;margin-bottom:6px;}
 .sub{font-size:13px;color:rgba(255,255,255,.4);margin-bottom:28px;}
-.demo-box{background:rgba(239,165,0,.08);border:1px solid rgba(239,165,0,.2);border-radius:10px;padding:12px 14px;font-size:12px;color:rgba(239,165,0,.85);margin-bottom:22px;line-height:1.8;}
-.roles{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;margin-bottom:24px;}
-.role{border:1.5px solid rgba(255,255,255,.08);border-radius:12px;padding:13px 10px;background:rgba(255,255,255,.02);cursor:pointer;text-align:center;transition:all .2s;}
-.role-icon{font-size:22px;display:block;margin-bottom:5px;}
-.role-label{font-size:11px;font-weight:500;color:rgba(255,255,255,.45);transition:color .2s;}
-.role:hover{border-color:rgba(35,82,232,.5);}
-.role.active{border-color:#2352E8;background:rgba(35,82,232,.15);}
-.role.active .role-label{color:white;}
 .field{margin-bottom:16px;}
 label{display:block;font-size:11px;font-weight:500;color:rgba(255,255,255,.4);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em;}
 input{width:100%;background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.08);border-radius:10px;padding:13px 16px;color:white;font-family:'DM Sans',sans-serif;font-size:14px;outline:none;transition:border-color .2s;}
@@ -45,17 +37,12 @@ input::placeholder{color:rgba(255,255,255,.2);}
     <div class="btext">AODesk BD Portal<span>Business Development System</span></div>
   </div>
   <h1>Sign in</h1>
-  <p class="sub">Select your role and enter your credentials.</p>
+  <p class="sub">Enter your credentials to access your dashboard.</p>
   <div class="demo-box">
     🎯 <strong>Demo accounts</strong><br/>
     👔 GM &nbsp;— gm@aodesk.com.au / gm1234<br/>
     📈 BDM — bdm@aodesk.com.au / bdm1234<br/>
     💻 IT &nbsp;&nbsp;— it@aodesk.com.au / it1234
-  </div>
-  <div class="roles">
-    <div class="role active" onclick="pick('gm',this)"><span class="role-icon">👔</span><div class="role-label">General Manager</div></div>
-    <div class="role" onclick="pick('bdm',this)"><span class="role-icon">📈</span><div class="role-label">BD Manager</div></div>
-    <div class="role" onclick="pick('it',this)"><span class="role-icon">💻</span><div class="role-label">IT / Admin</div></div>
   </div>
   <div class="field"><label>Email</label><input type="email" id="email" placeholder="you@aodesk.com.au"/></div>
   <div class="field"><label>Password</label><input type="password" id="pw" placeholder="••••••••" onkeydown="if(event.key==='Enter')login()"/></div>
@@ -68,30 +55,31 @@ const SUPABASE_URL='https://ioizmqqujnypodawlmag.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlvaXptcXF1am55cG9kYXdsbWFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3MjU2NjQsImV4cCI6MjA5NTMwMTY2NH0.Uyp-D9LalhWs2J4vesZbEKsIQCDCWKWI9BKD9Zck_No';
 const DEMO={'gm@aodesk.com.au':{pass:'gm1234',role:'gm',name:'General Manager'},'bdm@aodesk.com.au':{pass:'bdm1234',role:'bdm',name:'BD Manager'},'it@aodesk.com.au':{pass:'it1234',role:'it',name:'IT Admin'}};
 const PAGES={gm:'bd-gm.html',bdm:'bd-bdm.html',it:'bd-it.html'};
-let role='gm';
-function pick(r,el){role=r;document.querySelectorAll('.role').forEach(x=>x.classList.remove('active'));el.classList.add('active');}
+
 async function login(){
   const email=document.getElementById('email').value.trim(), pw=document.getElementById('pw').value;
   const err=document.getElementById('err'), btn=document.getElementById('loginBtn');
   err.classList.remove('show');
   if(!email||!pw){showErr('Please enter email and password.');return;}
   btn.textContent='Signing in...';btn.disabled=true;
+
+  // ── DEMO ACCOUNTS ──
   if(DEMO[email]){
     if(pw!==DEMO[email].pass){showErr('Incorrect password.');btn.textContent='Sign In →';btn.disabled=false;return;}
-    if(DEMO[email].role!==role){showErr(`This account is for the ${DEMO[email].name} role.`);btn.textContent='Sign In →';btn.disabled=false;return;}
     localStorage.removeItem('bd_leadgen');localStorage.removeItem('bd_pipeline');
     sessionStorage.setItem('bd_token','demo_token');
     sessionStorage.setItem('bd_role',DEMO[email].role);
     sessionStorage.setItem('bd_user',JSON.stringify({email,name:DEMO[email].name}));
     window.location.href=PAGES[DEMO[email].role];return;
   }
+
+  // ── REAL SUPABASE AUTH ──
   try{
     const res=await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`,{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY},body:JSON.stringify({email,password:pw})});
     const data=await res.json();
     if(!res.ok)throw new Error(data.error_description||'Login failed');
     const userRole=data.user?.user_metadata?.role;
-    if(!userRole)throw new Error('No role assigned. Contact administrator.');
-    if(userRole!==role)throw new Error(`This account is for the ${userRole.toUpperCase()} role.`);
+    if(!userRole)throw new Error('No role assigned. Contact your administrator.');
     sessionStorage.setItem('bd_token',data.access_token);
     sessionStorage.setItem('bd_role',userRole);
     sessionStorage.setItem('bd_user',JSON.stringify({email:data.user.email,name:data.user.user_metadata?.full_name||email.split('@')[0]}));
