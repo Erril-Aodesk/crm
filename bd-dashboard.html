@@ -188,7 +188,7 @@ textarea{resize:vertical;min-height:75px;}
   <div class="topbar">
     <div class="pt" id="pgTitle">Pipeline Board</div>
     <div class="ta">
-      <button class="btn bo" onclick="showView('calendar',document.querySelector(\'.ni[onclick*=calendar]\'))">📅 Calendar</button>
+      <button class="btn bo" onclick="showView('calendar',null)">📅 Calendar</button>
       <button class="btn bg" onclick="openZoom()">🎥 Zoom</button>
       <button class="btn bp" onclick="openAddLead()">+ Add Lead</button>
     </div>
@@ -359,7 +359,7 @@ document.getElementById('avI').textContent = (user.name||'G')[0].toUpperCase();
 // ── STATE ──
 let cy, cm_val, editId = null, detailId = null;
 const now = new Date(); cy = now.getFullYear(); cm_val = now.getMonth();
-let importRows = [];
+let importRows = [], _leads = [];
 const PER = 15;
 const pages = {all:1, confirmed:1};
 
@@ -368,6 +368,14 @@ function populateSelects(){
   STAGES.forEach(s=>{ ['lf_st','fltStage','fltStageC'].forEach(id=>{const el=document.getElementById(id);if(el&&el.tagName==='SELECT'){const o=document.createElement('option');o.value=s;o.textContent=s;el.appendChild(o);}}); });
   SOURCES.forEach(s=>{ const el=document.getElementById('lf_src');const o=document.createElement('option');o.value=s;o.textContent=s;el.appendChild(o); const el2=document.getElementById('fltSource');const o2=document.createElement('option');o2.value=s;o2.textContent=s;el2.appendChild(o2); });
   INDUSTRIES.forEach(s=>{ const el=document.getElementById('lf_ind');const o=document.createElement('option');o.value=s;o.textContent=s;el.appendChild(o); });
+}
+
+// ── LOAD ──
+async function loadLeads(){
+  showLoading('Loading leads...');
+  _leads = await getLeads();
+  hideLoading();
+  renderAll();
 }
 
 // ── VIEW SWITCH ──
@@ -385,23 +393,20 @@ function showView(v, el){
 
 // ── STATS ──
 function renderStats(){
-  const leads = getLeads();
-  const n = now;
-  document.getElementById('stTotal').textContent = leads.length;
-  document.getElementById('stConf').textContent = leads.filter(l=>CONFIRMED_STAGES.includes(l.stage)).length;
-  const ws = new Date(); ws.setDate(n.getDate()-n.getDay()); ws.setHours(0,0,0,0);
+  document.getElementById('stTotal').textContent = _leads.length;
+  document.getElementById('stConf').textContent = _leads.filter(l=>CONFIRMED_STAGES.includes(l.stage)).length;
+  const ws = new Date(); ws.setDate(now.getDate()-now.getDay()); ws.setHours(0,0,0,0);
   const we = new Date(ws); we.setDate(we.getDate()+7);
-  document.getElementById('stMeet').textContent = leads.filter(l=>l.meeting_date&&new Date(l.meeting_date)>=ws&&new Date(l.meeting_date)<we).length;
-  document.getElementById('stWon').textContent = leads.filter(l=>l.stage==='Closed Won'&&new Date(l.created_at).getMonth()===n.getMonth()).length;
-  document.getElementById('stLost').textContent = leads.filter(l=>l.stage==='Closed Lost'&&new Date(l.created_at).getMonth()===n.getMonth()).length;
+  document.getElementById('stMeet').textContent = _leads.filter(l=>l.meeting_date&&new Date(l.meeting_date)>=ws&&new Date(l.meeting_date)<we).length;
+  document.getElementById('stWon').textContent = _leads.filter(l=>l.stage==='Closed Won'&&new Date(l.created_at).getMonth()===now.getMonth()).length;
+  document.getElementById('stLost').textContent = _leads.filter(l=>l.stage==='Closed Lost'&&new Date(l.created_at).getMonth()===now.getMonth()).length;
 }
 
 // ── PIPELINE ──
 function renderPipeline(){
-  const leads = getLeads();
   const board = document.getElementById('board'); board.innerHTML='';
-  STAGES.forEach((stage,si)=>{
-    const sl = leads.filter(l=>l.stage===stage);
+  STAGES.forEach((stage)=>{
+    const sl = _leads.filter(l=>l.stage===stage);
     const m = STAGE_META[stage];
     const col = document.createElement('div'); col.className='col';
     col.innerHTML=`<div class="ch" style="background:linear-gradient(135deg,${m.bg},${m.bg}cc);color:${m.color}"><span>${m.icon} ${stage}</span><span class="cc">${sl.length}</span></div>
@@ -414,13 +419,16 @@ function renderPipeline(){
   });
 }
 
+// ── NEXT STAGE HELPER ──
+function nextStage(stage){ const i=STAGES.indexOf(stage); return i>=0&&i<STAGES.length-1?STAGES[i+1]:null; }
+
 // ── CRM TABLE ──
 function renderCRM(type){
   const isConf = type==='confirmed';
   const srch = document.getElementById(isConf?'srchConf':'srchAll').value.toLowerCase();
   const stageF = document.getElementById(isConf?'fltStageC':'fltStage').value;
   const srcF = !isConf ? document.getElementById('fltSource').value : '';
-  let leads = getLeads();
+  let leads = [..._leads];
   if(isConf) leads = leads.filter(l=>CONFIRMED_STAGES.includes(l.stage));
   if(stageF) leads = leads.filter(l=>l.stage===stageF);
   if(srcF) leads = leads.filter(l=>l.source===srcF);
@@ -431,34 +439,52 @@ function renderCRM(type){
   else{
     tbody.innerHTML = slice.map(l=>{
       const zl = l.zoom_link ? `<a href="${l.zoom_link}" target="_blank" style="color:var(--blue);font-size:11px">🔗 Join</a>` : '—';
+      const ns = nextStage(l.stage);
+      const nextBtn = ns && l.stage!=='Closed Won' && l.stage!=='Closed Lost'
+        ? `<button class="act-btn" style="color:#059669;border-color:#6EE7B7" onclick="quickStage(${l.id},'${ns}')">→ ${STAGE_META[ns].icon} ${ns}</button>`
+        : '';
       if(isConf) return `<tr>
-        <td><strong>${l.company}</strong></td><td>${l.contact}<br><span style="font-size:11px;color:var(--muted)">${l.email||''}</span></td>
-        <td>${l.industry||'—'}</td><td>${stageBadge(l.stage)}</td>
+        <td><strong>${l.company}</strong></td>
+        <td>${l.contact}<br><span style="font-size:11px;color:var(--muted)">${l.email||''}</span></td>
+        <td>${l.industry||'—'}</td>
+        <td>${stageBadge(l.stage)}</td>
         <td>${mtIcon(l.meeting_type)} ${l.meeting_type||'—'}</td>
-        <td>${fmtDateTime(l.meeting_date)}</td><td>${zl}</td>
+        <td>${fmtDateTime(l.meeting_date)}</td>
+        <td>${zl}</td>
         <td style="max-width:140px;font-size:12px;color:var(--muted)">${l.bdm_notes||'—'}</td>
-        <td><div class="act-btns"><button class="act-btn" onclick="openDetail(${l.id})">View</button><button class="act-btn" onclick="openEdit(${l.id})">Edit</button></div></td>
+        <td><div class="act-btns">${nextBtn}<button class="act-btn" onclick="openDetail(${l.id})">View</button><button class="act-btn" onclick="openEdit(${l.id})">Edit</button></div></td>
       </tr>`;
       return `<tr>
-        <td><strong>${l.company}</strong></td><td>${l.contact}<br><span style="font-size:11px;color:var(--muted)">${l.email||''}</span></td>
-        <td>${l.industry||'—'}</td><td>${l.source||'—'}</td><td>${stageBadge(l.stage)}</td>
-        <td>${mtIcon(l.meeting_type)} ${l.meeting_type||'—'}</td><td>${fmtDate(l.created_at)}</td>
-        <td><div class="act-btns"><button class="act-btn" onclick="openDetail(${l.id})">View</button><button class="act-btn" onclick="openEdit(${l.id})">Edit</button><button class="act-btn red" onclick="delLead(${l.id})">Del</button></div></td>
+        <td><strong>${l.company}</strong></td>
+        <td>${l.contact}<br><span style="font-size:11px;color:var(--muted)">${l.email||''}</span></td>
+        <td>${l.industry||'—'}</td>
+        <td>${l.source||'—'}</td>
+        <td>${stageBadge(l.stage)}</td>
+        <td>${mtIcon(l.meeting_type)} ${l.meeting_type||'—'}</td>
+        <td>${fmtDate(l.created_at)}</td>
+        <td><div class="act-btns">${nextBtn}<button class="act-btn" onclick="openDetail(${l.id})">View</button><button class="act-btn" onclick="openEdit(${l.id})">Edit</button><button class="act-btn red" onclick="delLead(${l.id})">Del</button></div></td>
       </tr>`;
     }).join('');
   }
-  // pagination
-  const totalPg = Math.ceil(total/PER);
+  const totalPg = Math.ceil(total/PER)||1;
   document.getElementById(isConf?'pgInfoConf':'pgInfoAll').textContent = `Showing ${Math.min(start+1,total)}–${Math.min(start+PER,total)} of ${total}`;
   const pgc = document.getElementById(isConf?'pgBtnsConf':'pgBtnsAll'); pgc.innerHTML='';
   for(let i=1;i<=totalPg;i++){ const b=document.createElement('button'); b.className='pg-btn'+(i===pg?' active':''); b.textContent=i; b.onclick=()=>{pages[type]=i;renderCRM(type);}; pgc.appendChild(b); }
 }
 
+// ── QUICK STAGE (inline button) ──
+async function quickStage(id, stage){
+  await updateLead(id, {stage});
+  const i = _leads.findIndex(l=>l.id==id);
+  if(i>-1) _leads[i].stage = stage;
+  renderAll();
+  showToast(`Moved to "${stage}" ✅`);
+}
+
 // ── DETAIL MODAL ──
 function openDetail(id){
   detailId=id;
-  const l=getLeads().find(x=>x.id==id); if(!l) return;
-  const m=STAGE_META[l.stage]||{};
+  const l=_leads.find(x=>x.id==id); if(!l) return;
   document.getElementById('detailBody').innerHTML=`
     <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:18px">
       <div><div class="mt">${l.company}</div><div class="ms">${l.contact} · ${l.email||''}</div></div>
@@ -480,8 +506,10 @@ function openDetail(id){
   openModal('mDetail');
 }
 
-function moveStage(id,stage){
-  updateLead(id,{stage});
+async function moveStage(id, stage){
+  await updateLead(id, {stage});
+  const i = _leads.findIndex(l=>l.id==id);
+  if(i>-1) _leads[i].stage = stage;
   renderAll();
   openDetail(id);
   showToast(`Moved to "${stage}"`);
@@ -491,7 +519,7 @@ function moveStage(id,stage){
 function openAddLead(){ editId=null; document.getElementById('mLeadTitle').textContent='Add New Lead'; clearLeadForm(); openModal('mLead'); }
 function openEdit(id){
   editId=id; document.getElementById('mLeadTitle').textContent='Edit Lead'; closeModal('mDetail');
-  const l=getLeads().find(x=>x.id==id); if(!l) return;
+  const l=_leads.find(x=>x.id==id); if(!l) return;
   document.getElementById('lf_co').value=l.company||'';
   document.getElementById('lf_ct').value=l.contact||'';
   document.getElementById('lf_em').value=l.email||'';
@@ -507,7 +535,8 @@ function openEdit(id){
 }
 function editLead(){ openEdit(detailId); }
 function clearLeadForm(){ ['lf_co','lf_ct','lf_em','lf_ph','lf_md','lf_zl','lf_no'].forEach(id=>document.getElementById(id).value=''); ['lf_ind','lf_src','lf_mt'].forEach(id=>document.getElementById(id).value=''); document.getElementById('lf_st').value='New Lead'; }
-function saveLead(){
+
+async function saveLead(){
   const co=document.getElementById('lf_co').value.trim(), ct=document.getElementById('lf_ct').value.trim();
   if(!co||!ct){ showToast('Company and contact are required','error'); return; }
   const data={ company:co, contact:ct, email:document.getElementById('lf_em').value.trim(), phone:document.getElementById('lf_ph').value.trim(),
@@ -515,20 +544,37 @@ function saveLead(){
     meeting_type:document.getElementById('lf_mt').value||null, meeting_date:document.getElementById('lf_md').value?new Date(document.getElementById('lf_md').value).toISOString():null,
     zoom_link:document.getElementById('lf_zl').value.trim()||null, notes:document.getElementById('lf_no').value.trim(),
     created_by:user.email||'gm@aodesk.com.au', bdm_notes:'' };
-  if(editId){ updateLead(editId,data); showToast(`"${co}" updated ✅`); }
-  else { addLead({...data,created_at:new Date().toISOString(),updated_at:new Date().toISOString()}); showToast(`"${co}" added ✅`); }
-  closeModal('mLead'); renderAll();
+  showLoading(editId?'Updating...':'Saving...');
+  if(editId){
+    const updated = await updateLead(editId, data);
+    const i = _leads.findIndex(l=>l.id==editId);
+    if(i>-1) _leads[i]={..._leads[i],...data,...updated};
+    showToast(`"${co}" updated ✅`);
+  } else {
+    const saved = await addLead({...data, created_at:new Date().toISOString(), updated_at:new Date().toISOString()});
+    _leads.unshift(saved||data);
+    showToast(`"${co}" added ✅`);
+  }
+  hideLoading();
+  closeModal('mLead');
+  renderAll();
 }
-function delLead(id){
-  const l=getLeads().find(x=>x.id==id);
+
+async function delLead(id){
+  const l=_leads.find(x=>x.id==id);
   if(!confirm(`Delete "${l?.company}"? This cannot be undone.`)) return;
-  deleteLead(id); renderAll(); showToast('Lead deleted');
+  showLoading('Deleting...');
+  await deleteLead(id);
+  _leads = _leads.filter(l=>l.id!=id);
+  hideLoading();
+  renderAll();
+  showToast('Lead deleted');
 }
 
 // ── ZOOM ──
 function openZoom(){ populateZoomLeads(); openModal('mZoom'); document.getElementById('zf_dt').valueAsDate=new Date(); }
-function zoomForLead(){ const l=getLeads().find(x=>x.id==detailId); if(l){document.getElementById('zf_top').value=`AODesk — Discovery Call with ${l.company}`;document.getElementById('zf_lead').value=l.id;if(l.email)document.getElementById('zf_em').value=l.email;} closeModal('mDetail'); openZoom(); }
-function populateZoomLeads(){ const s=document.getElementById('zf_lead'); s.innerHTML='<option value="">— Optional —</option>'; getLeads().forEach(l=>{const o=document.createElement('option');o.value=l.id;o.textContent=l.company;s.appendChild(o);}); }
+function zoomForLead(){ const l=_leads.find(x=>x.id==detailId); if(l){document.getElementById('zf_top').value=`AODesk — Discovery Call with ${l.company}`;document.getElementById('zf_lead').value=l.id;if(l.email)document.getElementById('zf_em').value=l.email;} closeModal('mDetail'); openZoom(); }
+function populateZoomLeads(){ const s=document.getElementById('zf_lead'); s.innerHTML='<option value="">— Optional —</option>'; _leads.forEach(l=>{const o=document.createElement('option');o.value=l.id;o.textContent=l.company;s.appendChild(o);}); }
 async function scheduleZoom(){
   const top=document.getElementById('zf_top').value.trim(), dt=document.getElementById('zf_dt').value, tm=document.getElementById('zf_tm').value;
   if(!top||!dt||!tm){ showToast('Topic, date and time required','error'); return; }
@@ -539,7 +585,12 @@ async function scheduleZoom(){
   document.getElementById('zResult').style.display='block';
   btn.textContent='✅ Scheduled'; btn.disabled=false;
   const lid=document.getElementById('zf_lead').value;
-  if(lid){ updateLead(lid,{meeting_date:new Date(`${dt}T${tm}`).toISOString(),meeting_type:'Zoom',zoom_link:link,stage:'Appointment Set'}); renderAll(); }
+  if(lid){
+    await updateLead(lid,{meeting_date:new Date(`${dt}T${tm}`).toISOString(),meeting_type:'Zoom',zoom_link:link,stage:'Appointment Set'});
+    const i=_leads.findIndex(l=>l.id==lid);
+    if(i>-1){_leads[i].meeting_type='Zoom';_leads[i].zoom_link=link;_leads[i].stage='Appointment Set';}
+    renderAll();
+  }
   showToast('Zoom meeting scheduled! 🎥');
 }
 function resetZoom(){ document.getElementById('zResult').style.display='none'; document.getElementById('zBtn').textContent='🎥 Schedule & Send Invite'; document.getElementById('zBtn').disabled=false; }
@@ -550,7 +601,6 @@ function renderCal(){
   document.getElementById('calT').textContent=title;
   const first=new Date(cy,cm_val,1), last=new Date(cy,cm_val+1,0);
   const grid=document.getElementById('calG'); grid.innerHTML='';
-  const leads=getLeads();
   const start=first.getDay();
   const allDays=[];
   for(let i=0;i<start;i++) allDays.push({d:new Date(cy,cm_val,-start+i+1),other:true});
@@ -558,7 +608,7 @@ function renderCal(){
   const rem=42-(allDays.length); for(let i=1;i<=rem;i++) allDays.push({d:new Date(cy,cm_val+1,i),other:true});
   allDays.forEach(({d,other})=>{
     const isToday=d.toDateString()===new Date().toDateString();
-    const dl=leads.filter(l=>l.meeting_date&&new Date(l.meeting_date).toDateString()===d.toDateString());
+    const dl=_leads.filter(l=>l.meeting_date&&new Date(l.meeting_date).toDateString()===d.toDateString());
     const div=document.createElement('div');
     div.className='cal-day'+(other?' other':'')+(isToday?' today':'');
     div.innerHTML=`<div class="dn">${d.getDate()}</div>${dl.map(l=>`<div class="ce ${(l.meeting_type||'').toLowerCase()}" onclick="openDetail(${l.id})">${l.company}</div>`).join('')}`;
@@ -576,37 +626,35 @@ function handleFile(file){
   r.onload=e=>{
     const wb=XLSX.read(e.target.result,{type:'binary'});
     const ws=wb.Sheets[wb.SheetNames[0]];
-    const rows=XLSX.utils.sheet_to_json(ws,{defval:''});
-    importRows=rows;
-    // Preview
+    importRows=XLSX.utils.sheet_to_json(ws,{defval:''});
     const head=document.getElementById('prevHead'); head.innerHTML='';
     const body=document.getElementById('prevBody'); body.innerHTML='';
-    if(rows.length){
-      Object.keys(rows[0]).forEach(k=>{const th=document.createElement('th');th.textContent=k;th.style.cssText='padding:6px 10px;white-space:nowrap;';head.appendChild(th);});
-      rows.slice(0,5).forEach(r=>{const tr=document.createElement('tr');Object.values(r).forEach(v=>{const td=document.createElement('td');td.textContent=v;td.style.cssText='padding:6px 10px;border-top:1px solid #eee;';tr.appendChild(td);});body.appendChild(tr);});
+    if(importRows.length){
+      Object.keys(importRows[0]).forEach(k=>{const th=document.createElement('th');th.textContent=k;th.style.cssText='padding:6px 10px;white-space:nowrap;';head.appendChild(th);});
+      importRows.slice(0,5).forEach(row=>{const tr=document.createElement('tr');Object.values(row).forEach(v=>{const td=document.createElement('td');td.textContent=v;td.style.cssText='padding:6px 10px;border-top:1px solid #eee;';tr.appendChild(td);});body.appendChild(tr);});
     }
-    document.getElementById('importCount').textContent=`${rows.length} rows found.`;
+    document.getElementById('importCount').textContent=`${importRows.length} rows found.`;
     document.getElementById('importPreview').style.display='block';
     document.getElementById('importBtn').style.display='inline-flex';
   };
   r.readAsBinaryString(file);
 }
-function doImport(){
+async function doImport(){
   if(!importRows.length) return;
-  const leads=getLeads();
   const MAP={company:['company','Company','COMPANY','company name','Company Name'],contact:['contact','Contact','contact person','Contact Person','name','Name'],email:['email','Email','EMAIL'],phone:['phone','Phone','PHONE','mobile','Mobile'],industry:['industry','Industry'],source:['source','Source','lead source','Lead Source'],stage:['stage','Stage'],notes:['notes','Notes','note','Note']};
   function get(row,keys){ for(const k of keys){if(row[k]!==undefined&&row[k]!=='') return String(row[k]);} return ''; }
   const now2=new Date().toISOString();
+  const batch=[];
   importRows.forEach(row=>{
-    const co=get(row,MAP.company), ct=get(row,MAP.contact);
-    if(!co) return;
+    const co=get(row,MAP.company); if(!co)return;
     const stage=get(row,MAP.stage)||'New Lead';
-    leads.unshift({id:Date.now()+Math.random(),company:co,contact:ct||'—',email:get(row,MAP.email),phone:get(row,MAP.phone),industry:get(row,MAP.industry),source:get(row,MAP.source),stage:STAGES.includes(stage)?stage:'New Lead',notes:get(row,MAP.notes),meeting_type:null,meeting_date:null,zoom_link:null,bdm_notes:'',created_by:'import',created_at:now2,updated_at:now2});
+    batch.push({company:co,contact:get(row,MAP.contact)||'—',email:get(row,MAP.email),phone:get(row,MAP.phone),industry:get(row,MAP.industry),source:get(row,MAP.source),stage:STAGES.includes(stage)?stage:'New Lead',notes:get(row,MAP.notes),meeting_type:null,meeting_date:null,zoom_link:null,bdm_notes:'',created_by:'import',created_at:now2,updated_at:now2});
   });
-  saveLeads(leads);
-  renderAll();
+  showLoading(`Importing ${batch.length} leads...`);
+  await bulkInsertLeads(batch);
+  await loadLeads();
   closeModal('mImport');
-  showToast(`${importRows.length} leads imported ✅`);
+  showToast(`${batch.length} leads imported ✅`);
 }
 
 // ── RENDER ALL ──
@@ -615,7 +663,7 @@ function renderAll(){ renderStats(); renderPipeline(); if(document.getElementByI
 // ── INIT ──
 document.querySelectorAll('.ov').forEach(o=>o.addEventListener('click',e=>{if(e.target===o){o.classList.remove('show');resetZoom();}}));
 populateSelects();
-renderAll();
+loadLeads();
 </script>
 </body>
 </html>

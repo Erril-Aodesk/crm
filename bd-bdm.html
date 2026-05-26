@@ -221,10 +221,21 @@ const user=getUser();
 document.getElementById('uN').textContent=user.name||'BD Manager';
 document.getElementById('avI').textContent=(user.name||'B')[0].toUpperCase();
 let curTab='log', editId=null, detailId=null;
+let _leads=[];
 
 // Populate selects
 SOURCES.forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s;document.getElementById('f_src').appendChild(o);});
 STAGES.forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s;document.getElementById('fltSt2').appendChild(o);});
+
+// ── LOAD ──
+async function loadLeads(){
+  showLoading('Loading...');
+  _leads = await getLeads();
+  hideLoading();
+  renderStats();
+  if(curTab==='mine') renderMine();
+  if(curTab==='all') renderAll2();
+}
 
 function showTab(tab,el){
   curTab=tab;
@@ -238,8 +249,7 @@ function showTab(tab,el){
 }
 
 function renderStats(){
-  const leads=getLeads();
-  const mine=leads.filter(l=>l.created_by===user.email);
+  const mine=_leads.filter(l=>l.created_by===user.email);
   document.getElementById('stMy').textContent=mine.length;
   const now2=new Date();
   document.getElementById('stMonth').textContent=mine.filter(l=>new Date(l.created_at).getMonth()===now2.getMonth()).length;
@@ -247,7 +257,7 @@ function renderStats(){
 }
 
 function renderMine(){
-  const leads=getLeads().filter(l=>l.created_by===user.email);
+  const leads=_leads.filter(l=>l.created_by===user.email);
   const tbody=document.getElementById('tbMine');
   if(!leads.length){tbody.innerHTML='<tr><td colspan="7" class="no-data">No appointments logged yet.</td></tr>';return;}
   tbody.innerHTML=leads.map(l=>`<tr>
@@ -264,7 +274,7 @@ function renderMine(){
 function renderAll2(){
   const srch=(document.getElementById('srchAll2').value||document.getElementById('globalSrch').value).toLowerCase();
   const stF=document.getElementById('fltSt2').value;
-  let leads=getLeads();
+  let leads=[..._leads];
   if(stF) leads=leads.filter(l=>l.stage===stF);
   if(srch) leads=leads.filter(l=>(l.company+l.contact+l.email).toLowerCase().includes(srch));
   const tbody=document.getElementById('tbAll2');
@@ -281,19 +291,25 @@ function renderAll2(){
   </tr>`).join('');
 }
 
-function saveLog(){
+async function saveLog(){
   const co=document.getElementById('f_co').value.trim(), ct=document.getElementById('f_ct').value.trim();
   const dt=document.getElementById('f_dt').value, mt=document.getElementById('f_mt').value;
   if(!co||!ct||!dt||!mt){showToast('Fill in all required fields','error');return;}
   const tm=document.getElementById('f_tm').value;
-  const lead={company:co,contact:ct,email:document.getElementById('f_em').value.trim(),phone:document.getElementById('f_ph').value.trim(),
+  const lead={company:co,contact:ct,
+    email:document.getElementById('f_em').value.trim(),
+    phone:document.getElementById('f_ph').value.trim(),
     source:document.getElementById('f_src').value,stage:'Appointment Set',
     meeting_date:tm?new Date(`${dt}T${tm}`).toISOString():new Date(dt).toISOString(),
     meeting_type:mt,notes:document.getElementById('f_no').value.trim(),
     bdm_notes:document.getElementById('f_no').value.trim(),
-    created_by:user.email||'bdm@aodesk.com.au',created_at:new Date().toISOString(),updated_at:new Date().toISOString(),
-    zoom_link:null,industry:'',};
-  addLead(lead);
+    created_by:user.email||'bdm@aodesk.com.au',
+    created_at:new Date().toISOString(),updated_at:new Date().toISOString(),
+    zoom_link:null,industry:''};
+  showLoading('Saving...');
+  const saved = await addLead(lead);
+  _leads.unshift(saved||lead);
+  hideLoading();
   clearLog();
   renderStats();
   showToast(`Appointment for "${co}" logged ✅`);
@@ -304,7 +320,7 @@ function clearLog(){['f_co','f_ct','f_em','f_ph','f_no'].forEach(id=>document.ge
 
 function openEditModal(id){
   editId=id;
-  const l=getLeads().find(x=>x.id==id);if(!l)return;
+  const l=_leads.find(x=>x.id==id);if(!l)return;
   document.getElementById('mEditTitle').textContent=`Update — ${l.company}`;
   document.getElementById('e_ct').value=l.contact||'';
   document.getElementById('e_em').value=l.email||'';
@@ -317,8 +333,9 @@ function openEditModal(id){
   openModal('mEdit');
 }
 function openEditFromDetail(){closeModal('mDetail');openEditModal(detailId);}
-function saveEdit(){
-  const l=getLeads().find(x=>x.id==editId);if(!l)return;
+
+async function saveEdit(){
+  const l=_leads.find(x=>x.id==editId);if(!l)return;
   const patch={
     contact:document.getElementById('e_ct').value.trim()||l.contact,
     email:document.getElementById('e_em').value.trim(),
@@ -328,7 +345,11 @@ function saveEdit(){
     bdm_notes:document.getElementById('e_no').value.trim(),
   };
   if(document.getElementById('e_appt').checked&&l.stage==='New Lead') patch.stage='Appointment Set';
-  updateLead(editId,patch);
+  showLoading('Saving...');
+  await updateLead(editId,patch);
+  const i=_leads.findIndex(x=>x.id==editId);
+  if(i>-1) _leads[i]={..._leads[i],...patch};
+  hideLoading();
   closeModal('mEdit');
   renderStats();
   if(curTab==='mine') renderMine();
@@ -338,7 +359,7 @@ function saveEdit(){
 
 function openDetail(id){
   detailId=id;
-  const l=getLeads().find(x=>x.id==id);if(!l)return;
+  const l=_leads.find(x=>x.id==id);if(!l)return;
   document.getElementById('detailBody').innerHTML=`
     <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px">
       <div><div class="mt">${l.company}</div><div class="ms">${l.contact} · ${l.email||''}</div></div>
@@ -357,7 +378,7 @@ function openDetail(id){
 
 document.querySelectorAll('.ov').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('show');}));
 document.getElementById('f_dt').valueAsDate=new Date();
-renderStats();
+loadLeads();
 </script>
 </body>
 </html>
