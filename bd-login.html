@@ -17,6 +17,11 @@ canvas{position:absolute;inset:0;opacity:.4;pointer-events:none;}
 .btext span{display:block;font-size:10px;font-weight:400;color:rgba(255,255,255,.35);letter-spacing:.07em;text-transform:uppercase;margin-top:2px;}
 h1{font-family:'Syne',sans-serif;font-weight:800;font-size:26px;color:white;margin-bottom:6px;}
 .sub{font-size:13px;color:rgba(255,255,255,.4);margin-bottom:28px;}
+.demo-box{background:rgba(239,165,0,.08);border:1px solid rgba(239,165,0,.2);border-radius:10px;padding:12px 14px;font-size:12px;color:rgba(239,165,0,.85);margin-bottom:22px;line-height:1.9;}
+.demo-box strong{color:rgba(239,165,0,1);font-size:13px;}
+.demo-row{display:flex;align-items:center;gap:6px;margin-top:4px;}
+.demo-role{width:28px;text-align:center;font-size:14px;}
+.demo-cred{font-family:monospace;font-size:11px;color:rgba(255,255,255,.55);letter-spacing:.02em;}
 .field{margin-bottom:16px;}
 label{display:block;font-size:11px;font-weight:500;color:rgba(255,255,255,.4);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em;}
 input{width:100%;background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.08);border-radius:10px;padding:13px 16px;color:white;font-family:'DM Sans',sans-serif;font-size:14px;outline:none;transition:border-color .2s;}
@@ -39,10 +44,10 @@ input::placeholder{color:rgba(255,255,255,.2);}
   <h1>Sign in</h1>
   <p class="sub">Enter your credentials to access your dashboard.</p>
   <div class="demo-box">
-    🎯 <strong>Demo accounts</strong><br/>
-    👔 GM &nbsp;— gm@aodesk.com.au / gm1234<br/>
-    📈 BDM — bdm@aodesk.com.au / bdm1234<br/>
-    💻 IT &nbsp;&nbsp;— it@aodesk.com.au / it1234
+    🎯 <strong>Demo Accounts</strong>
+    <div class="demo-row"><span class="demo-role">👔</span><div><div style="color:rgba(255,255,255,.75);font-size:12px">General Manager</div><div class="demo-cred">gm@aodesk.com.au &nbsp;·&nbsp; gm1234</div></div></div>
+    <div class="demo-row"><span class="demo-role">📈</span><div><div style="color:rgba(255,255,255,.75);font-size:12px">BD Manager</div><div class="demo-cred">bdm@aodesk.com.au &nbsp;·&nbsp; bdm1234</div></div></div>
+    <div class="demo-row"><span class="demo-role">💻</span><div><div style="color:rgba(255,255,255,.75);font-size:12px">IT Admin</div><div class="demo-cred">it@aodesk.com.au &nbsp;·&nbsp; it1234</div></div></div>
   </div>
   <div class="field"><label>Email</label><input type="email" id="email" placeholder="you@aodesk.com.au"/></div>
   <div class="field"><label>Password</label><input type="password" id="pw" placeholder="••••••••" onkeydown="if(event.key==='Enter')login()"/></div>
