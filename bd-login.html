@@ -157,6 +157,8 @@ async function login(){
   if(DEMO[email]) {
     if(password !== DEMO[email].pass){ showErr('Incorrect password for demo account.'); btn.textContent='Sign In →'; btn.disabled=false; return; }
     if(DEMO[email].role !== role){ showErr(`This account is for the ${DEMO[email].name} role. Please select that role.`); btn.textContent='Sign In →'; btn.disabled=false; return; }
+    // Clear stale demo data so fresh DEMO_LEADS load
+    localStorage.removeItem('bd_leads');
     sessionStorage.setItem('bd_token', 'demo_token');
     sessionStorage.setItem('bd_role', DEMO[email].role);
     sessionStorage.setItem('bd_user', JSON.stringify({ email, name: DEMO[email].name }));

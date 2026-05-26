@@ -20,6 +20,20 @@ const SOURCES     = ['Referral','Cold Outreach','LinkedIn','Website Inquiry','Ev
 const MEETING_TYPES = ['Zoom','Phone','F2F'];
 const INDUSTRIES  = ['Finance & Accounting','Legal','Real Estate','Technology','Healthcare','Retail','Construction','Insurance','Education','Other'];
 
+// ── DEMO LEADS (dates set to May/June 2026) ──
+const DEMO_LEADS = [
+  {id:1,  company:'Nexgen Finance Group',    contact:'Mark Williams', email:'mark@nexgen.com.au',      phone:'+61 412 000 111', source:'Referral',       industry:'Finance & Accounting', stage:'New Lead',        meeting_type:null,   meeting_date:null,                        notes:'Interested in 2 VA roles.',           zoom_link:null, created_by:'it@aodesk.com.au',  created_at:'2026-05-01T09:00:00Z', updated_at:'2026-05-01T09:00:00Z', bdm_notes:''},
+  {id:2,  company:'BlueSky Accounting',      contact:'Sarah Chen',    email:'sarah@bluesky.com.au',    phone:'+61 421 000 222', source:'LinkedIn',        industry:'Finance & Accounting', stage:'Appointment Set', meeting_type:'Zoom',  meeting_date:'2026-05-27T10:00:00+10:00', notes:'Needs bookkeeper + admin.',           zoom_link:'https://zoom.us/j/123456789', created_by:'bdm@aodesk.com.au', created_at:'2026-05-05T10:00:00Z', updated_at:'2026-05-18T10:00:00Z', bdm_notes:'Prefers morning slots.'},
+  {id:3,  company:'Pacific Realty Partners', contact:'Tom Hughes',    email:'tom@pacificrealty.com.au',phone:'+61 432 000 333', source:'Cold Outreach',   industry:'Real Estate',          stage:'Meeting Done',    meeting_type:'Zoom',  meeting_date:'2026-05-28T14:00:00+10:00', notes:'Needs 1 admin + 1 property mgmt VA.',zoom_link:'https://zoom.us/j/987654321', created_by:'it@aodesk.com.au',  created_at:'2026-05-08T11:00:00Z', updated_at:'2026-05-28T14:00:00Z', bdm_notes:'Very positive.'},
+  {id:4,  company:'Ironclad Legal',          contact:'Priya Nair',    email:'priya@ironclad.com.au',   phone:'+61 445 000 444', source:'Website Inquiry', industry:'Legal',                stage:'Proposal Sent',   meeting_type:'F2F',   meeting_date:'2026-05-29T09:00:00+10:00', notes:'Proposal for 3 paralegals sent.',     zoom_link:null, created_by:'it@aodesk.com.au',  created_at:'2026-05-10T08:00:00Z', updated_at:'2026-05-29T09:00:00Z', bdm_notes:'Follow up Friday.'},
+  {id:5,  company:'Coastal Builders',        contact:'Dave Nguyen',   email:'dave@coastalbuild.com.au',phone:'+61 456 000 555', source:'Referral',        industry:'Construction',         stage:'Closed Won',      meeting_type:'Zoom',  meeting_date:'2026-05-26T11:00:00+10:00', notes:'Signed 3-month agreement.',           zoom_link:null, created_by:'bdm@aodesk.com.au', created_at:'2026-05-12T09:00:00Z', updated_at:'2026-05-26T11:00:00Z', bdm_notes:'Great client.'},
+  {id:6,  company:'Summit Insurance',        contact:'Claire Foster', email:'claire@summit.com.au',    phone:'+61 467 000 666', source:'Event / Expo',    industry:'Insurance',            stage:'Negotiation',     meeting_type:'Phone', meeting_date:'2026-05-27T15:00:00+10:00', notes:'Discussing pricing for 4 VAs.',       zoom_link:null, created_by:'it@aodesk.com.au',  created_at:'2026-05-14T10:00:00Z', updated_at:'2026-05-27T15:00:00Z', bdm_notes:'Price sensitive.'},
+  {id:7,  company:'MedCore Health',          contact:'James Reilly',  email:'james@medcore.com.au',    phone:'+61 478 000 777', source:'Referral',        industry:'Healthcare',           stage:'New Lead',        meeting_type:null,   meeting_date:null,                        notes:'Looking for 3 medical admin VAs.',    zoom_link:null, created_by:'it@aodesk.com.au',  created_at:'2026-05-15T09:00:00Z', updated_at:'2026-05-15T09:00:00Z', bdm_notes:''},
+  {id:8,  company:'TechNova Solutions',      contact:'Amy Park',      email:'amy@technova.com.au',     phone:'+61 489 000 888', source:'LinkedIn',        industry:'Technology',           stage:'Appointment Set', meeting_type:'Zoom',  meeting_date:'2026-05-28T09:00:00+10:00', notes:'Needs dev support + 1 VA.',           zoom_link:'https://zoom.us/j/111222333', created_by:'bdm@aodesk.com.au', created_at:'2026-05-16T10:00:00Z', updated_at:'2026-05-28T10:00:00Z', bdm_notes:'Tech-savvy client.'},
+  {id:9,  company:'Greenfield Education',    contact:'Robert Tan',    email:'robert@greenfield.edu.au',phone:'+61 490 000 999', source:'Cold Outreach',   industry:'Education',            stage:'Closed Lost',     meeting_type:'Phone', meeting_date:'2026-05-22T10:00:00+10:00', notes:'Budget constraints. May revisit Q3.', zoom_link:null, created_by:'it@aodesk.com.au',  created_at:'2026-05-17T09:00:00Z', updated_at:'2026-05-22T09:00:00Z', bdm_notes:'Keep warm.'},
+  {id:10, company:'Harbour Retail Group',    contact:'Lisa Wong',     email:'lisa@harbourretail.com.au',phone:'+61 400 111 222',source:'Referral',        industry:'Retail',               stage:'Meeting Done',    meeting_type:'F2F',   meeting_date:'2026-05-29T13:00:00+10:00', notes:'Interested in 5 VAs across 3 stores.',zoom_link:null, created_by:'bdm@aodesk.com.au', created_at:'2026-05-18T09:00:00Z', updated_at:'2026-05-29T13:00:00Z', bdm_notes:'Big account potential.'},
+];
+
 // ── SUPABASE API HELPER ──
 async function sbFetch(path, method = 'GET', body = null, extra = {}) {
   const token = sessionStorage.getItem('bd_token');
@@ -63,7 +77,12 @@ async function getLeads() {
   // Demo mode — use localStorage with pre-loaded demo data
   if(sessionStorage.getItem('bd_token') === 'demo_token') {
     const raw = localStorage.getItem('bd_leads');
-    if(!raw) { localStorage.setItem('bd_leads', JSON.stringify(DEMO_LEADS)); return JSON.parse(JSON.stringify(DEMO_LEADS)); }
+    // Always reload fresh demo data if nothing stored yet
+    if(!raw) {
+      const fresh = JSON.parse(JSON.stringify(DEMO_LEADS));
+      localStorage.setItem('bd_leads', JSON.stringify(fresh));
+      return fresh;
+    }
     return JSON.parse(raw);
   }
   try {
