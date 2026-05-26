@@ -300,7 +300,7 @@ async function saveLog(){
     email:document.getElementById('f_em').value.trim(),
     phone:document.getElementById('f_ph').value.trim(),
     source:document.getElementById('f_src').value,stage:'Appointment Set',
-    meeting_date:tm?new Date(`${dt}T${tm}`).toISOString():new Date(dt).toISOString(),
+    meeting_date:tm ? new Date(`${dt}T${tm}:00`).toISOString() : new Date(`${dt}T09:00:00`).toISOString(),
     meeting_type:mt,notes:document.getElementById('f_no').value.trim(),
     bdm_notes:document.getElementById('f_no').value.trim(),
     created_by:user.email||'bdm@aodesk.com.au',

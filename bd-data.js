@@ -145,14 +145,15 @@ async function bulkInsertLeads(leadsArray) {
 // ── HELPERS ──
 function fmtDate(d, short = false) {
   if (!d) return '—';
+  // Parse and display in local timezone to avoid UTC date shift
   const dt = new Date(d);
   return short
-    ? dt.toLocaleDateString('en-AU', { day: '2-digit', month: 'short' })
-    : dt.toLocaleDateString('en-AU', { day: '2-digit', month: 'short', year: 'numeric' });
+    ? dt.toLocaleDateString('en-AU', { day: '2-digit', month: 'short', timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone })
+    : dt.toLocaleDateString('en-AU', { day: '2-digit', month: 'short', year: 'numeric', timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone });
 }
 function fmtDateTime(d) {
   if (!d) return '—';
-  return new Date(d).toLocaleString('en-AU', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+  return new Date(d).toLocaleString('en-AU', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone });
 }
 function stageBadge(stage) {
   const m = STAGE_META[stage] || { icon: '•', color: '#666', bg: '#eee' };

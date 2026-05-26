@@ -413,7 +413,7 @@ function renderPipeline(){
     <div class="cards">${sl.length?sl.map(l=>`<div class="lcard" onclick="openDetail(${l.id})">
       <div class="lc-co">${l.company}</div><div class="lc-ct">${l.contact}</div>
       <div class="lc-meta"><span class="lc-src">${l.source||'—'}</span><span>${mtIcon(l.meeting_type)}</span></div>
-      ${l.meeting_date?`<div class="lc-dt">📅 ${fmtDate(l.meeting_date,true)}</div>`:''}
+      ${l.meeting_date?`<div class="lc-dt">📅 ${fmtDate(l.meeting_date,true)} ${l.meeting_type?'· '+mtIcon(l.meeting_type):''}</div>`:''}
     </div>`).join(''):'<div class="ecol">No leads</div>'}</div>`;
     board.appendChild(col);
   });
@@ -596,6 +596,11 @@ async function scheduleZoom(){
 function resetZoom(){ document.getElementById('zResult').style.display='none'; document.getElementById('zBtn').textContent='🎥 Schedule & Send Invite'; document.getElementById('zBtn').disabled=false; }
 
 // ── CALENDAR ──
+function sameDay(d1, d2){
+  // Compare in local timezone to avoid UTC shift issues
+  const a=new Date(d1), b=new Date(d2);
+  return a.getFullYear()===b.getFullYear() && a.getMonth()===b.getMonth() && a.getDate()===b.getDate();
+}
 function renderCal(){
   const title=new Date(cy,cm_val).toLocaleDateString('en-AU',{month:'long',year:'numeric'});
   document.getElementById('calT').textContent=title;
@@ -607,12 +612,31 @@ function renderCal(){
   for(let d=1;d<=last.getDate();d++) allDays.push({d:new Date(cy,cm_val,d),other:false});
   const rem=42-(allDays.length); for(let i=1;i<=rem;i++) allDays.push({d:new Date(cy,cm_val+1,i),other:true});
   allDays.forEach(({d,other})=>{
-    const isToday=d.toDateString()===new Date().toDateString();
-    const dl=_leads.filter(l=>l.meeting_date&&new Date(l.meeting_date).toDateString()===d.toDateString());
+    const isToday=sameDay(d,new Date());
+    // Filter all leads with meetings on this day
+    const dl=_leads.filter(l=>l.meeting_date && sameDay(new Date(l.meeting_date), d));
+    // Sort by time
+    dl.sort((a,b)=>new Date(a.meeting_date)-new Date(b.meeting_date));
+    const MAX_SHOW = 3;
+    const visible = dl.slice(0, MAX_SHOW);
+    const overflow = dl.length - MAX_SHOW;
     const div=document.createElement('div');
     div.className='cal-day'+(other?' other':'')+(isToday?' today':'');
-    div.innerHTML=`<div class="dn">${d.getDate()}</div>${dl.map(l=>`<div class="ce ${(l.meeting_type||'').toLowerCase()}" onclick="openDetail(${l.id})">${l.company}</div>`).join('')}`;
-    div.addEventListener('click',e=>{if(e.target===div){document.getElementById('zf_dt').value=d.toISOString().split('T')[0];openZoom();}});
+    div.style.minHeight='90px';
+    div.innerHTML=`<div class="dn">${d.getDate()}</div>
+      ${visible.map(l=>{
+        const t = l.meeting_date ? new Date(l.meeting_date).toLocaleTimeString('en-AU',{hour:'2-digit',minute:'2-digit',hour12:true}) : '';
+        return `<div class="ce ${(l.meeting_type||'').toLowerCase()}" onclick="event.stopPropagation();openDetail(${l.id})" title="${l.company} — ${t}">
+          ${t?`<span style="font-size:9px;opacity:.7">${t}</span> `:''}${l.company}
+        </div>`;
+      }).join('')}
+      ${overflow>0?`<div style="font-size:10px;color:var(--muted);padding:2px 4px;cursor:pointer" onclick="event.stopPropagation()">+${overflow} more</div>`:''}`;
+    div.addEventListener('click',e=>{
+      if(e.target===div||e.target.className==='dn'){
+        document.getElementById('zf_dt').value=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+        openZoom();
+      }
+    });
     grid.appendChild(div);
   });
 }
