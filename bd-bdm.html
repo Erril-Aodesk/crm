@@ -178,7 +178,7 @@ tr:hover td{background:#FAFBFF;}
 <!-- EDIT CONTACT + NOTES MODAL -->
 <div class="ov" id="mEdit">
   <div class="modal">
-    <div class="mt" id="mEditTitle">Update Lead</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px"><div class="mt" id="mEditTitle">Update Lead</div><button onclick="closeModal('mEdit')" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted);line-height:1">×</button></div>
     <div class="ms">You can update contact details, add notes, or move this lead to Appointment Set.</div>
     <div class="ro-notice">⚠️ You can only update contact details, BDM notes, and move to "Appointment Set". Stage changes beyond that are reserved for GM.</div>
     <div class="fg">
@@ -206,7 +206,7 @@ tr:hover td{background:#FAFBFF;}
 <!-- DETAIL VIEW MODAL -->
 <div class="ov" id="mDetail">
   <div class="modal">
-    <div id="detailBody"></div>
+    <div style="display:flex;justify-content:flex-end"><button onclick="closeModal('mDetail')" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted);line-height:1">×</button></div><div id="detailBody"></div>
     <div class="ma">
       <button class="btn bo" onclick="closeModal('mDetail')">Close</button>
       <button class="btn bg2" onclick="openEditFromDetail()">✏️ Update</button>

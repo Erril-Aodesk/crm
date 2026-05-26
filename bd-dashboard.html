@@ -259,7 +259,10 @@ textarea{resize:vertical;min-height:75px;}
 <!-- ADD/EDIT LEAD MODAL -->
 <div class="ov" id="mLead">
   <div class="modal">
-    <div class="mt" id="mLeadTitle">Add New Lead</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+      <div class="mt" id="mLeadTitle">Add New Lead</div>
+      <button onclick="closeModal('mLead')" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted);line-height:1">×</button>
+    </div>
     <div class="ms">Enter the lead details below.</div>
     <div class="fg">
       <div class="f"><label>Company Name *</label><input type="text" id="lf_co" placeholder="Acme Pty Ltd"/></div>
@@ -284,6 +287,9 @@ textarea{resize:vertical;min-height:75px;}
 <!-- LEAD DETAIL MODAL -->
 <div class="ov" id="mDetail">
   <div class="modal" style="width:600px">
+    <div style="display:flex;justify-content:flex-end;margin-bottom:-10px">
+      <button onclick="closeModal('mDetail')" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted);line-height:1">×</button>
+    </div>
     <div id="detailBody"></div>
     <div class="ma">
       <button class="btn bo" onclick="closeModal('mDetail')">Close</button>
@@ -296,8 +302,11 @@ textarea{resize:vertical;min-height:75px;}
 <!-- ZOOM MODAL -->
 <div class="ov" id="mZoom">
   <div class="modal">
-    <div class="zoom-badge">🎥 Zoom Scheduler</div>
-    <div class="mt">Schedule a Zoom Meeting</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+      <div class="zoom-badge" style="margin-bottom:0">🎥 Zoom Scheduler</div>
+      <button onclick="closeModal('mZoom');resetZoom()" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted);line-height:1">×</button>
+    </div>
+    <div class="mt" style="margin-top:12px">Schedule a Zoom Meeting</div>
     <div class="ms">Fill in the details to generate a Zoom link and send the invite.</div>
     <div class="f" style="margin-bottom:14px"><label>Meeting Topic *</label><input type="text" id="zf_top" placeholder="AODesk — Discovery Call with [Company]"/></div>
     <div class="fg">
@@ -324,7 +333,10 @@ textarea{resize:vertical;min-height:75px;}
 <!-- IMPORT MODAL -->
 <div class="ov" id="mImport">
   <div class="modal">
-    <div class="mt">Import Leads from Excel</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+      <div class="mt">Import Leads from Excel</div>
+      <button onclick="closeModal('mImport')" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted);line-height:1">×</button>
+    </div>
     <div class="ms">Upload your .xlsx file. Columns: Company, Contact, Email, Phone, Industry, Source, Stage, Notes.</div>
     <div class="import-zone" id="dropZone" onclick="document.getElementById('xlsxFile').click()" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="handleDrop(event)">
       <div style="font-size:32px">📥</div>
@@ -597,9 +609,15 @@ function resetZoom(){ document.getElementById('zResult').style.display='none'; d
 
 // ── CALENDAR ──
 function sameDay(d1, d2){
-  // Compare in local timezone to avoid UTC shift issues
-  const a=new Date(d1), b=new Date(d2);
-  return a.getFullYear()===b.getFullYear() && a.getMonth()===b.getMonth() && a.getDate()===b.getDate();
+  const a = new Date(d1), b = new Date(d2);
+  return a.getFullYear()===b.getFullYear() &&
+         a.getMonth()===b.getMonth() &&
+         a.getDate()===b.getDate();
+}
+function localDateStr(d){
+  // Returns YYYY-MM-DD in local timezone
+  const dt = new Date(d);
+  return `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;
 }
 function renderCal(){
   const title=new Date(cy,cm_val).toLocaleDateString('en-AU',{month:'long',year:'numeric'});
@@ -608,32 +626,39 @@ function renderCal(){
   const grid=document.getElementById('calG'); grid.innerHTML='';
   const start=first.getDay();
   const allDays=[];
-  for(let i=0;i<start;i++) allDays.push({d:new Date(cy,cm_val,-start+i+1),other:true});
+  for(let i=0;i<start;i++) allDays.push({d:new Date(cy,cm_val,1-(start-i)),other:true});
   for(let d=1;d<=last.getDate();d++) allDays.push({d:new Date(cy,cm_val,d),other:false});
-  const rem=42-(allDays.length); for(let i=1;i<=rem;i++) allDays.push({d:new Date(cy,cm_val+1,i),other:true});
+  const rem=42-allDays.length;
+  for(let i=1;i<=rem;i++) allDays.push({d:new Date(cy,cm_val+1,i),other:true});
+
+  // Pre-build a map of date string → leads for fast lookup
+  const dayMap = {};
+  _leads.forEach(l=>{
+    if(!l.meeting_date) return;
+    const key = localDateStr(l.meeting_date);
+    if(!dayMap[key]) dayMap[key]=[];
+    dayMap[key].push(l);
+  });
+
   allDays.forEach(({d,other})=>{
-    const isToday=sameDay(d,new Date());
-    // Filter all leads with meetings on this day
-    const dl=_leads.filter(l=>l.meeting_date && sameDay(new Date(l.meeting_date), d));
-    // Sort by time
-    dl.sort((a,b)=>new Date(a.meeting_date)-new Date(b.meeting_date));
-    const MAX_SHOW = 3;
-    const visible = dl.slice(0, MAX_SHOW);
-    const overflow = dl.length - MAX_SHOW;
+    const isToday = localDateStr(d)===localDateStr(new Date());
+    const key = localDateStr(d);
+    const dl = (dayMap[key]||[]).sort((a,b)=>new Date(a.meeting_date)-new Date(b.meeting_date));
+    const MAX_SHOW=3, visible=dl.slice(0,MAX_SHOW), overflow=dl.length-MAX_SHOW;
     const div=document.createElement('div');
     div.className='cal-day'+(other?' other':'')+(isToday?' today':'');
     div.style.minHeight='90px';
     div.innerHTML=`<div class="dn">${d.getDate()}</div>
       ${visible.map(l=>{
-        const t = l.meeting_date ? new Date(l.meeting_date).toLocaleTimeString('en-AU',{hour:'2-digit',minute:'2-digit',hour12:true}) : '';
+        const t=new Date(l.meeting_date).toLocaleTimeString('en-AU',{hour:'2-digit',minute:'2-digit',hour12:true});
         return `<div class="ce ${(l.meeting_type||'').toLowerCase()}" onclick="event.stopPropagation();openDetail(${l.id})" title="${l.company} — ${t}">
-          ${t?`<span style="font-size:9px;opacity:.7">${t}</span> `:''}${l.company}
+          <span style="font-size:9px;opacity:.75">${t}</span> ${l.company}
         </div>`;
       }).join('')}
-      ${overflow>0?`<div style="font-size:10px;color:var(--muted);padding:2px 4px;cursor:pointer" onclick="event.stopPropagation()">+${overflow} more</div>`:''}`;
+      ${overflow>0?`<div style="font-size:10px;color:var(--muted);padding:2px 5px">+${overflow} more</div>`:''}`;
     div.addEventListener('click',e=>{
-      if(e.target===div||e.target.className==='dn'){
-        document.getElementById('zf_dt').value=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+      if(e.target===div||e.target.classList.contains('dn')){
+        document.getElementById('zf_dt').value=key;
         openZoom();
       }
     });

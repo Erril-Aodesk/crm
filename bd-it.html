@@ -154,7 +154,7 @@ textarea{resize:vertical;min-height:75px;}
 <!-- ADD/EDIT MODAL -->
 <div class="ov" id="mLead">
   <div class="modal">
-    <div class="mt" id="mLeadT">Add New Lead</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px"><div class="mt" id="mLeadT">Add New Lead</div><button onclick="closeModal('mLead')" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted);line-height:1">×</button></div>
     <div class="ms">Fill in the CRM lead details.</div>
     <div class="fg">
       <div class="f"><label>Company Name *</label><input type="text" id="lf_co" placeholder="Acme Pty Ltd"/></div>
@@ -179,7 +179,7 @@ textarea{resize:vertical;min-height:75px;}
 <!-- DETAIL MODAL -->
 <div class="ov" id="mDetail">
   <div class="modal">
-    <div id="detailBody"></div>
+    <div style="display:flex;justify-content:flex-end"><button onclick="closeModal('mDetail')" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted);line-height:1">×</button></div><div id="detailBody"></div>
     <div class="ma">
       <button class="btn bo" onclick="closeModal('mDetail')">Close</button>
       <button class="btn bp" onclick="editFromDetail()">✏️ Edit</button>
@@ -191,7 +191,7 @@ textarea{resize:vertical;min-height:75px;}
 <!-- IMPORT MODAL -->
 <div class="ov" id="mImport">
   <div class="modal">
-    <div class="mt">Import Leads from Excel</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px"><div class="mt">Import Leads from Excel</div><button onclick="closeModal('mImport')" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted);line-height:1">×</button></div>
     <div class="ms">Supported columns: Company, Contact, Email, Phone, Industry, Source, Stage, Notes</div>
     <div class="import-zone" id="dropZone" onclick="document.getElementById('xlsxFile').click()" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="handleDrop(event)">
       <div style="font-size:32px">📥</div>
