@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>AODesk BD — BDM Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--navy:#080F26;--blue:#2352E8;--sky:#3B82F6;--gold:#EFA500;--white:#fff;--light:#EEF3FF;--muted:#7B8DB0;--bg:#F2F5FF;--border:#E0E8F8;--text:#111827;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh;}
+.sidebar{width:220px;background:var(--navy);position:fixed;top:0;left:0;bottom:0;display:flex;flex-direction:column;z-index:100;}
+.sl{padding:22px 18px 14px;border-bottom:1px solid rgba(255,255,255,0.06);}
+.sl-mark{width:38px;height:38px;background:linear-gradient(135deg,var(--gold),#F76B1C);border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:17px;color:white;margin-bottom:8px;}
+.sl-name{font-family:'Syne',sans-serif;font-weight:700;font-size:14px;color:white;}
+.sl-role{font-size:10px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.07em;}
+nav{flex:1;padding:12px 10px;}
+.ng{font-size:9px;color:rgba(255,255,255,.2);letter-spacing:.1em;text-transform:uppercase;padding:12px 10px 4px;}
+.ni{display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:9px;color:rgba(255,255,255,.5);font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;}
+.ni:hover{background:rgba(255,255,255,.06);color:white;}
+.ni.active{background:rgba(239,165,0,.2);color:white;}
+.ni .ico{font-size:15px;width:20px;text-align:center;}
+.sf{padding:14px 18px;border-top:1px solid rgba(255,255,255,.06);}
+.uc{display:flex;align-items:center;gap:10px;}
+.av{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--gold),#F76B1C);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:700;font-size:12px;color:white;flex-shrink:0;}
+.un{font-size:13px;color:white;font-weight:500;}
+.ur{font-size:10px;color:rgba(255,255,255,.3);}
+.lob{background:none;border:none;color:rgba(255,255,255,.25);cursor:pointer;font-size:15px;margin-left:auto;padding:4px;}
+.lob:hover{color:rgba(255,255,255,.7);}
+.main{margin-left:220px;flex:1;display:flex;flex-direction:column;}
+.topbar{background:white;border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
+.pt{font-family:'Syne',sans-serif;font-weight:700;font-size:17px;}
+.btn{padding:8px 16px;border-radius:9px;font-size:13px;font-weight:500;cursor:pointer;border:none;display:inline-flex;align-items:center;gap:6px;transition:all .15s;font-family:'DM Sans',sans-serif;}
+.bp{background:var(--blue);color:white;box-shadow:0 2px 8px rgba(35,82,232,.3);}
+.bp:hover{background:#1a41d6;}
+.bo{background:white;color:var(--text);border:1.5px solid var(--border);}
+.bo:hover{border-color:var(--blue);color:var(--blue);}
+.bg2{background:var(--gold);color:white;}
+.bg2:hover{background:#d49200;}
+.content{padding:22px 24px;flex:1;}
+.sg{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:22px;}
+.sc{background:white;border-radius:13px;padding:18px;border:1px solid var(--border);}
+.sl2{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;}
+.sv{font-family:'Syne',sans-serif;font-weight:800;font-size:26px;}
+.sv.gold{color:var(--gold);}
+.sv.green{color:#15803D;}
+
+/* FORM */
+.fc{background:white;border-radius:14px;border:1px solid var(--border);padding:26px;margin-bottom:22px;}
+.fc-title{font-family:'Syne',sans-serif;font-weight:700;font-size:16px;margin-bottom:4px;}
+.fc-sub{font-size:13px;color:var(--muted);margin-bottom:22px;}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.f{margin-bottom:0;}
+.ff{grid-column:1/-1;}
+label{display:block;font-size:11px;font-weight:600;color:var(--muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:.06em;}
+input,select,textarea{width:100%;background:var(--light);border:1.5px solid var(--border);border-radius:9px;padding:10px 13px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;transition:border-color .2s;}
+input:focus,select:focus,textarea:focus{border-color:var(--blue);}
+textarea{resize:vertical;min-height:75px;}
+.fa{display:flex;justify-content:flex-end;gap:8px;margin-top:18px;}
+
+/* TABLE */
+.tcard{background:white;border-radius:14px;border:1px solid var(--border);overflow:hidden;}
+.thead2{padding:14px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);}
+.tcard-title{font-family:'Syne',sans-serif;font-weight:700;font-size:15px;}
+.tcontrols{display:flex;gap:8px;align-items:center;}
+.srch{background:var(--light);border:1.5px solid var(--border);border-radius:9px;padding:7px 12px;font-size:13px;outline:none;width:190px;font-family:'DM Sans',sans-serif;}
+.srch:focus{border-color:var(--blue);}
+select.flt{background:var(--light);border:1.5px solid var(--border);border-radius:9px;padding:7px 10px;font-size:12px;outline:none;font-family:'DM Sans',sans-serif;}
+table{width:100%;border-collapse:collapse;}
+th{background:var(--light);padding:10px 14px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;}
+td{padding:11px 14px;font-size:13px;border-bottom:1px solid var(--border);vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:#FAFBFF;}
+.stage-badge{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap;}
+.act-btn{padding:5px 10px;border-radius:7px;font-size:11px;font-weight:500;cursor:pointer;border:1.5px solid var(--border);background:white;color:var(--text);transition:all .15s;margin-right:4px;}
+.act-btn:hover{border-color:var(--blue);color:var(--blue);}
+.act-btn.gold:hover{border-color:var(--gold);color:var(--gold);}
+.no-data{text-align:center;padding:40px;color:var(--muted);font-size:13px;}
+
+/* MODAL */
+.ov{display:none;position:fixed;inset:0;background:rgba(8,15,38,.65);backdrop-filter:blur(4px);z-index:200;align-items:center;justify-content:center;}
+.ov.show{display:flex;}
+.modal{background:white;border-radius:18px;padding:30px;width:520px;max-width:95vw;max-height:90vh;overflow-y:auto;animation:up .3s cubic-bezier(.16,1,.3,1);box-shadow:0 32px 64px rgba(0,0,0,.2);}
+@keyframes up{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.mt{font-family:'Syne',sans-serif;font-weight:700;font-size:18px;margin-bottom:4px;}
+.ms{font-size:13px;color:var(--muted);margin-bottom:20px;}
+.sep{height:1px;background:var(--border);margin:16px 0;}
+.dl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;}
+.dv{font-size:14px;font-weight:500;}
+.dg{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
+.ma{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;}
+.ro-notice{background:var(--light);border:1px solid var(--border);border-radius:9px;padding:10px 14px;font-size:12px;color:var(--muted);margin-bottom:16px;}
+
+/* TOAST */
+.toast{position:fixed;bottom:22px;right:22px;background:var(--navy);color:white;padding:11px 18px;border-radius:11px;font-size:13px;font-weight:500;box-shadow:0 8px 24px rgba(0,0,0,.2);z-index:999;opacity:0;transform:translateY(8px);transition:all .3s;pointer-events:none;}
+.toast.show{opacity:1;transform:translateY(0);}
+.toast.toast-err{background:#7F1D1D;}
+</style>
+</head>
+<body>
+<script src="bd-data.js"></script>
+
+<aside class="sidebar">
+  <div class="sl"><div class="sl-mark">B</div><div class="sl-name">AODesk BD</div><div class="sl-role">BD Manager</div></div>
+  <nav>
+    <div class="ng">My Work</div>
+    <div class="ni active" onclick="showTab('log',this)"><span class="ico">📝</span>Log Appointment</div>
+    <div class="ni" onclick="showTab('mine',this)"><span class="ico">📋</span>My Appointments</div>
+    <div class="ng">CRM</div>
+    <div class="ni" onclick="showTab('all',this)"><span class="ico">🗂</span>All Leads (Read)</div>
+  </nav>
+  <div class="sf"><div class="uc"><div class="av" id="avI">B</div><div><div class="un" id="uN">BDM</div><div class="ur">BDM Access</div></div><button class="lob" onclick="logout()">⏻</button></div></div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <div class="pt" id="pgTitle">Log Appointment</div>
+    <div style="display:flex;gap:8px">
+      <input class="srch" placeholder="🔍 Search leads..." id="globalSrch" oninput="if(curTab==='all')renderAll2()" style="width:180px"/>
+    </div>
+  </div>
+  <div class="content">
+    <div class="sg">
+      <div class="sc"><div class="sl2">My Total</div><div class="sv" id="stMy">0</div></div>
+      <div class="sc"><div class="sl2">This Month</div><div class="sv gold" id="stMonth">0</div></div>
+      <div class="sc"><div class="sl2">Converted Won</div><div class="sv green" id="stWon">0</div></div>
+    </div>
+
+    <!-- LOG APPOINTMENT -->
+    <div id="tab-log">
+      <div class="fc">
+        <div class="fc-title">Log New Appointment</div>
+        <div class="fc-sub">Enter the approved appointment details. GM will be notified.</div>
+        <div class="fg">
+          <div class="f"><label>Company Name *</label><input type="text" id="f_co" placeholder="Acme Pty Ltd"/></div>
+          <div class="f"><label>Contact Person *</label><input type="text" id="f_ct" placeholder="John Smith"/></div>
+          <div class="f"><label>Contact Email</label><input type="email" id="f_em" placeholder="john@acme.com.au"/></div>
+          <div class="f"><label>Contact Phone</label><input type="text" id="f_ph" placeholder="+61 4xx xxx xxx"/></div>
+          <div class="f"><label>Appointment Date *</label><input type="date" id="f_dt"/></div>
+          <div class="f"><label>Appointment Time</label><input type="time" id="f_tm"/></div>
+          <div class="f"><label>Meeting Type *</label>
+            <select id="f_mt"><option value="">Select...</option><option>Zoom</option><option>Phone</option><option>F2F</option></select></div>
+          <div class="f"><label>Lead Source</label>
+            <select id="f_src"><option value="">Select...</option></select></div>
+          <div class="f ff"><label>Notes / Talking Points</label><textarea id="f_no" placeholder="What does the prospect need? Key context for the GM..."></textarea></div>
+        </div>
+        <div class="fa">
+          <button class="btn bo" onclick="clearLog()">Clear</button>
+          <button class="btn bp" onclick="saveLog()">✅ Submit Appointment</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MY APPOINTMENTS -->
+    <div id="tab-mine" style="display:none">
+      <div class="tcard">
+        <div class="thead2"><div class="tcard-title">My Logged Appointments</div></div>
+        <div style="overflow-x:auto"><table><thead><tr><th>Company</th><th>Contact</th><th>Date</th><th>Type</th><th>Stage</th><th>My Notes</th><th>Actions</th></tr></thead><tbody id="tbMine"></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- ALL LEADS (read + notes + contact edit + move to appt) -->
+    <div id="tab-all" style="display:none">
+      <div class="tcard">
+        <div class="thead2">
+          <div class="tcard-title">All Leads</div>
+          <div class="tcontrols">
+            <input class="srch" placeholder="🔍 Search..." id="srchAll2" oninput="renderAll2()"/>
+            <select class="flt" id="fltSt2" onchange="renderAll2()"><option value="">All Stages</option></select>
+          </div>
+        </div>
+        <div style="overflow-x:auto"><table><thead><tr><th>Company</th><th>Contact</th><th>Email</th><th>Source</th><th>Stage</th><th>Meeting</th><th>BDM Notes</th><th>Actions</th></tr></thead><tbody id="tbAll2"></tbody></table></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT CONTACT + NOTES MODAL -->
+<div class="ov" id="mEdit">
+  <div class="modal">
+    <div class="mt" id="mEditTitle">Update Lead</div>
+    <div class="ms">You can update contact details, add notes, or move this lead to Appointment Set.</div>
+    <div class="ro-notice">⚠️ You can only update contact details, BDM notes, and move to "Appointment Set". Stage changes beyond that are reserved for GM.</div>
+    <div class="fg">
+      <div class="f"><label>Contact Person</label><input type="text" id="e_ct"/></div>
+      <div class="f"><label>Email</label><input type="email" id="e_em"/></div>
+      <div class="f"><label>Phone</label><input type="text" id="e_ph"/></div>
+      <div class="f"><label>Meeting Type</label>
+        <select id="e_mt"><option value="">None</option><option>Zoom</option><option>Phone</option><option>F2F</option></select></div>
+      <div class="f"><label>Appointment Date</label><input type="datetime-local" id="e_md"/></div>
+      <div class="f ff"><label>BDM Notes</label><textarea id="e_no" placeholder="Your notes visible to GM..."></textarea></div>
+    </div>
+    <div class="sep"></div>
+    <div class="dl">Move to Appointment Set?</div>
+    <div style="display:flex;align-items:center;gap:10px;margin-top:8px">
+      <input type="checkbox" id="e_appt" style="width:auto;border-radius:4px"/>
+      <label style="text-transform:none;letter-spacing:0;font-size:13px;color:var(--text)">Mark as Appointment Set (only if currently New Lead)</label>
+    </div>
+    <div class="ma">
+      <button class="btn bo" onclick="closeModal('mEdit')">Cancel</button>
+      <button class="btn bp" onclick="saveEdit()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- DETAIL VIEW MODAL -->
+<div class="ov" id="mDetail">
+  <div class="modal">
+    <div id="detailBody"></div>
+    <div class="ma">
+      <button class="btn bo" onclick="closeModal('mDetail')">Close</button>
+      <button class="btn bg2" onclick="openEditFromDetail()">✏️ Update</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<script>
+authGuard(['bdm']);
+const user=getUser();
+document.getElementById('uN').textContent=user.name||'BD Manager';
+document.getElementById('avI').textContent=(user.name||'B')[0].toUpperCase();
+let curTab='log', editId=null, detailId=null;
+
+// Populate selects
+SOURCES.forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s;document.getElementById('f_src').appendChild(o);});
+STAGES.forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s;document.getElementById('fltSt2').appendChild(o);});
+
+function showTab(tab,el){
+  curTab=tab;
+  ['log','mine','all'].forEach(t=>document.getElementById('tab-'+t).style.display=t===tab?'block':'none');
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
+  if(el) el.classList.add('active');
+  const titles={log:'Log Appointment',mine:'My Appointments',all:'All Leads (Read-Only)'};
+  document.getElementById('pgTitle').textContent=titles[tab];
+  if(tab==='mine') renderMine();
+  if(tab==='all') renderAll2();
+}
+
+function renderStats(){
+  const leads=getLeads();
+  const mine=leads.filter(l=>l.created_by===user.email);
+  document.getElementById('stMy').textContent=mine.length;
+  const now2=new Date();
+  document.getElementById('stMonth').textContent=mine.filter(l=>new Date(l.created_at).getMonth()===now2.getMonth()).length;
+  document.getElementById('stWon').textContent=mine.filter(l=>l.stage==='Closed Won').length;
+}
+
+function renderMine(){
+  const leads=getLeads().filter(l=>l.created_by===user.email);
+  const tbody=document.getElementById('tbMine');
+  if(!leads.length){tbody.innerHTML='<tr><td colspan="7" class="no-data">No appointments logged yet.</td></tr>';return;}
+  tbody.innerHTML=leads.map(l=>`<tr>
+    <td><strong>${l.company}</strong></td>
+    <td>${l.contact}</td>
+    <td>${l.meeting_date?fmtDate(l.meeting_date):fmtDate(l.created_at)}</td>
+    <td>${mtIcon(l.meeting_type)} ${l.meeting_type||'—'}</td>
+    <td>${stageBadge(l.stage)}</td>
+    <td style="max-width:160px;font-size:11px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${l.bdm_notes||l.notes||'—'}</td>
+    <td><button class="act-btn" onclick="openDetail(${l.id})">View</button><button class="act-btn gold" onclick="openEditModal(${l.id})">Update</button></td>
+  </tr>`).join('');
+}
+
+function renderAll2(){
+  const srch=(document.getElementById('srchAll2').value||document.getElementById('globalSrch').value).toLowerCase();
+  const stF=document.getElementById('fltSt2').value;
+  let leads=getLeads();
+  if(stF) leads=leads.filter(l=>l.stage===stF);
+  if(srch) leads=leads.filter(l=>(l.company+l.contact+l.email).toLowerCase().includes(srch));
+  const tbody=document.getElementById('tbAll2');
+  if(!leads.length){tbody.innerHTML='<tr><td colspan="8" class="no-data">No leads found.</td></tr>';return;}
+  tbody.innerHTML=leads.map(l=>`<tr>
+    <td><strong>${l.company}</strong></td>
+    <td>${l.contact}</td>
+    <td style="font-size:12px;color:var(--muted)">${l.email||'—'}</td>
+    <td>${l.source||'—'}</td>
+    <td>${stageBadge(l.stage)}</td>
+    <td>${mtIcon(l.meeting_type)} ${l.meeting_type||'—'}</td>
+    <td style="max-width:140px;font-size:11px;color:#1D4ED8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${l.bdm_notes||'—'}</td>
+    <td><button class="act-btn" onclick="openDetail(${l.id})">View</button><button class="act-btn gold" onclick="openEditModal(${l.id})">Update</button></td>
+  </tr>`).join('');
+}
+
+function saveLog(){
+  const co=document.getElementById('f_co').value.trim(), ct=document.getElementById('f_ct').value.trim();
+  const dt=document.getElementById('f_dt').value, mt=document.getElementById('f_mt').value;
+  if(!co||!ct||!dt||!mt){showToast('Fill in all required fields','error');return;}
+  const tm=document.getElementById('f_tm').value;
+  const lead={company:co,contact:ct,email:document.getElementById('f_em').value.trim(),phone:document.getElementById('f_ph').value.trim(),
+    source:document.getElementById('f_src').value,stage:'Appointment Set',
+    meeting_date:tm?new Date(`${dt}T${tm}`).toISOString():new Date(dt).toISOString(),
+    meeting_type:mt,notes:document.getElementById('f_no').value.trim(),
+    bdm_notes:document.getElementById('f_no').value.trim(),
+    created_by:user.email||'bdm@aodesk.com.au',created_at:new Date().toISOString(),updated_at:new Date().toISOString(),
+    zoom_link:null,industry:'',};
+  addLead(lead);
+  clearLog();
+  renderStats();
+  showToast(`Appointment for "${co}" logged ✅`);
+  showTab('mine',document.querySelectorAll('.ni')[1]);
+}
+
+function clearLog(){['f_co','f_ct','f_em','f_ph','f_no'].forEach(id=>document.getElementById(id).value='');['f_mt','f_src'].forEach(id=>document.getElementById(id).value='');document.getElementById('f_dt').valueAsDate=new Date();}
+
+function openEditModal(id){
+  editId=id;
+  const l=getLeads().find(x=>x.id==id);if(!l)return;
+  document.getElementById('mEditTitle').textContent=`Update — ${l.company}`;
+  document.getElementById('e_ct').value=l.contact||'';
+  document.getElementById('e_em').value=l.email||'';
+  document.getElementById('e_ph').value=l.phone||'';
+  document.getElementById('e_mt').value=l.meeting_type||'';
+  document.getElementById('e_md').value=l.meeting_date?new Date(l.meeting_date).toISOString().slice(0,16):'';
+  document.getElementById('e_no').value=l.bdm_notes||'';
+  document.getElementById('e_appt').checked=false;
+  document.getElementById('e_appt').disabled=l.stage!=='New Lead';
+  openModal('mEdit');
+}
+function openEditFromDetail(){closeModal('mDetail');openEditModal(detailId);}
+function saveEdit(){
+  const l=getLeads().find(x=>x.id==editId);if(!l)return;
+  const patch={
+    contact:document.getElementById('e_ct').value.trim()||l.contact,
+    email:document.getElementById('e_em').value.trim(),
+    phone:document.getElementById('e_ph').value.trim(),
+    meeting_type:document.getElementById('e_mt').value||null,
+    meeting_date:document.getElementById('e_md').value?new Date(document.getElementById('e_md').value).toISOString():l.meeting_date,
+    bdm_notes:document.getElementById('e_no').value.trim(),
+  };
+  if(document.getElementById('e_appt').checked&&l.stage==='New Lead') patch.stage='Appointment Set';
+  updateLead(editId,patch);
+  closeModal('mEdit');
+  renderStats();
+  if(curTab==='mine') renderMine();
+  if(curTab==='all') renderAll2();
+  showToast('Lead updated ✅');
+}
+
+function openDetail(id){
+  detailId=id;
+  const l=getLeads().find(x=>x.id==id);if(!l)return;
+  document.getElementById('detailBody').innerHTML=`
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px">
+      <div><div class="mt">${l.company}</div><div class="ms">${l.contact} · ${l.email||''}</div></div>
+      ${stageBadge(l.stage)}
+    </div>
+    <div class="dg">
+      <div><div class="dl">Phone</div><div class="dv">${l.phone||'—'}</div></div>
+      <div><div class="dl">Source</div><div class="dv">${l.source||'—'}</div></div>
+      <div><div class="dl">Meeting Type</div><div class="dv">${mtIcon(l.meeting_type)} ${l.meeting_type||'—'}</div></div>
+      <div><div class="dl">Meeting Date</div><div class="dv">${fmtDateTime(l.meeting_date)}</div></div>
+    </div>
+    ${l.notes?`<div class="sep"></div><div class="dl">Notes</div><div class="dv" style="font-weight:400;line-height:1.6;margin-top:4px">${l.notes}</div>`:''}
+    ${l.bdm_notes?`<div class="sep"></div><div class="dl">Your BDM Notes</div><div class="dv" style="font-weight:400;line-height:1.6;color:#1D4ED8;margin-top:4px">${l.bdm_notes}</div>`:''}`;
+  openModal('mDetail');
+}
+
+document.querySelectorAll('.ov').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('show');}));
+document.getElementById('f_dt').valueAsDate=new Date();
+renderStats();
+</script>
+</body>
+</html>
