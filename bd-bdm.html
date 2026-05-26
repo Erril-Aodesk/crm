@@ -67,7 +67,7 @@
         </div>
         <div style="overflow-x:auto">
           <table>
-            <thead><tr><th>Company</th><th>Contact</th><th>Phone</th><th>Industry</th><th>Source</th><th>Call Outcome</th><th>Callback Date</th><th>Appointed</th><th>Actions</th></tr></thead>
+            <thead><tr><th>Company / Industry</th><th>Contact</th><th>📞 Phone</th><th>Source</th><th>Call Outcome</th><th>Callback Date</th><th>Appointed</th><th>Actions</th></tr></thead>
             <tbody id="leadsBody"></tbody>
           </table>
         </div>
@@ -190,6 +190,21 @@ const PER=20;
 // populate filters
 INDUSTRIES.forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s;document.getElementById('fltIndustry').appendChild(o);});
 
+function copyPhone(phone){
+  if(!phone||phone==='—') return;
+  navigator.clipboard.writeText(phone).then(()=>{
+    showToast('📋 '+phone+' copied!');
+  }).catch(()=>{
+    // fallback for older browsers
+    const el=document.createElement('textarea');
+    el.value=phone; el.style.position='fixed'; el.style.opacity='0';
+    document.body.appendChild(el); el.select();
+    document.execCommand('copy');
+    document.body.removeChild(el);
+    showToast('📋 '+phone+' copied!');
+  });
+}
+
 async function init(){
   showLoading('Loading leads...');
   [_leads, _pipe] = await Promise.all([getLeadgen(), getPipeline()]);
@@ -231,15 +246,25 @@ function renderLeads(){
   if(srch) leads=leads.filter(l=>(l.company+l.contact+l.email+l.phone).toLowerCase().includes(srch));
   const total=leads.length, start=(lgPage-1)*PER, slice=leads.slice(start,start+PER);
   const tbody=document.getElementById('leadsBody');
-  if(!slice.length){tbody.innerHTML='<tr><td colspan="9" class="no-data">No leads found.</td></tr>';document.getElementById('lgPgInfo').textContent='';document.getElementById('lgPgBtns').innerHTML='';return;}
+  if(!slice.length){tbody.innerHTML='<tr><td colspan="8" class="no-data">No leads found.</td></tr>';document.getElementById('lgPgInfo').textContent='';document.getElementById('lgPgBtns').innerHTML='';return;}
   const todayEnd=new Date();todayEnd.setHours(23,59,59,999);
   tbody.innerHTML=slice.map(l=>{
     const isCallback=l.call_outcome==='Callback'&&l.callback_date&&new Date(l.callback_date)<=todayEnd;
     return `<tr class="${isCallback?'callback-row':''}">
-      <td><strong>${l.company}</strong>${isCallback?'<span style="font-size:10px;color:#B45309;margin-left:6px">📞 Callback today!</span>':''}</td>
-      <td>${l.contact}<br><span style="font-size:11px;color:var(--muted)">${l.email||''}</span></td>
-      <td style="font-size:12px">${l.phone||'—'}</td>
-      <td style="font-size:12px">${l.industry||'—'}</td>
+      <td>
+        <strong>${l.company}</strong>
+        ${isCallback?'<span style="font-size:10px;color:#B45309;margin-left:6px">📞 Callback today!</span>':''}
+        <div style="font-size:12px;color:var(--muted);margin-top:2px">${l.industry||''}</div>
+      </td>
+      <td>
+        ${l.contact}
+        <div style="font-size:11px;color:var(--muted);margin-top:1px">${l.email||''}</div>
+      </td>
+      <td>
+        <span onclick="copyPhone('${l.phone||''}')" title="Click to copy" style="font-size:14px;font-weight:700;color:var(--text);cursor:pointer;display:inline-flex;align-items:center;gap:5px">
+          ${l.phone||'—'} <span style="font-size:10px;color:var(--muted);font-weight:400">📋</span>
+        </span>
+      </td>
       <td style="font-size:12px">${l.source||'—'}</td>
       <td>${outcomeBadge(l.call_outcome)}</td>
       <td style="font-size:12px">${l.callback_date?fmtDateTime(l.callback_date):'—'}</td>
