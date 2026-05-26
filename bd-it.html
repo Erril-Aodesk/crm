@@ -4,117 +4,31 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>AODesk BD — IT Admin</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet"/>
+<script src="bd-data.js"></script>
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-:root{--navy:#080F26;--blue:#2352E8;--sky:#3B82F6;--teal:#0F766E;--white:#fff;--light:#EEF3FF;--muted:#7B8DB0;--bg:#F2F5FF;--border:#E0E8F8;--text:#111827;}
-body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh;}
-.sidebar{width:220px;background:var(--navy);position:fixed;top:0;left:0;bottom:0;display:flex;flex-direction:column;z-index:100;}
-.sl{padding:22px 18px 14px;border-bottom:1px solid rgba(255,255,255,0.06);}
-.sl-mark{width:38px;height:38px;background:linear-gradient(135deg,#0F766E,#0EA5E9);border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:17px;color:white;margin-bottom:8px;}
-.sl-name{font-family:'Syne',sans-serif;font-weight:700;font-size:14px;color:white;}
-.sl-role{font-size:10px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.07em;}
-nav{flex:1;padding:12px 10px;}
-.ng{font-size:9px;color:rgba(255,255,255,.2);letter-spacing:.1em;text-transform:uppercase;padding:12px 10px 4px;}
-.ni{display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:9px;color:rgba(255,255,255,.5);font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;}
-.ni:hover{background:rgba(255,255,255,.06);color:white;}
-.ni.active{background:rgba(15,118,110,.25);color:white;}
-.ni .ico{font-size:15px;width:20px;text-align:center;}
-.sf{padding:14px 18px;border-top:1px solid rgba(255,255,255,.06);}
-.uc{display:flex;align-items:center;gap:10px;}
-.av{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#0F766E,#0EA5E9);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:700;font-size:12px;color:white;flex-shrink:0;}
-.un{font-size:13px;color:white;font-weight:500;}
-.ur{font-size:10px;color:rgba(255,255,255,.3);}
-.lob{background:none;border:none;color:rgba(255,255,255,.25);cursor:pointer;font-size:15px;margin-left:auto;padding:4px;}
-.lob:hover{color:rgba(255,255,255,.7);}
-.main{margin-left:220px;flex:1;display:flex;flex-direction:column;}
-.topbar{background:white;border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
-.pt{font-family:'Syne',sans-serif;font-weight:700;font-size:17px;}
-.btn{padding:8px 16px;border-radius:9px;font-size:13px;font-weight:500;cursor:pointer;border:none;display:inline-flex;align-items:center;gap:6px;transition:all .15s;font-family:'DM Sans',sans-serif;}
-.bp{background:var(--blue);color:white;box-shadow:0 2px 8px rgba(35,82,232,.3);}
-.bp:hover{background:#1a41d6;}
-.bo{background:white;color:var(--text);border:1.5px solid var(--border);}
-.bo:hover{border-color:var(--blue);color:var(--blue);}
-.bt{background:#0F766E;color:white;box-shadow:0 2px 8px rgba(15,118,110,.3);}
-.bt:hover{background:#0b5e57;}
-.bsm{padding:6px 12px;font-size:12px;}
-.content{padding:22px 24px;flex:1;}
-
-.sg{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px;}
-.sc{background:white;border-radius:13px;padding:18px;border:1px solid var(--border);}
-.sl2{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;}
-.sv{font-family:'Syne',sans-serif;font-weight:800;font-size:26px;}
-.sv.teal{color:var(--teal);}
-
-.tcard{background:white;border-radius:14px;border:1px solid var(--border);overflow:hidden;}
-.thead2{padding:14px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:8px;}
-.tcard-title{font-family:'Syne',sans-serif;font-weight:700;font-size:15px;}
-.tcontrols{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
-.srch{background:var(--light);border:1.5px solid var(--border);border-radius:9px;padding:7px 12px;font-size:13px;outline:none;width:190px;font-family:'DM Sans',sans-serif;}
-.srch:focus{border-color:var(--blue);}
-select.flt{background:var(--light);border:1.5px solid var(--border);border-radius:9px;padding:7px 10px;font-size:12px;outline:none;font-family:'DM Sans',sans-serif;}
-table{width:100%;border-collapse:collapse;}
-th{background:var(--light);padding:10px 14px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;}
-td{padding:11px 14px;font-size:13px;border-bottom:1px solid var(--border);vertical-align:middle;}
-tr:last-child td{border-bottom:none;}
-tr:hover td{background:#FAFBFF;}
-.stage-badge{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap;}
-.act-btn{padding:5px 10px;border-radius:7px;font-size:11px;font-weight:500;cursor:pointer;border:1.5px solid var(--border);background:white;color:var(--text);transition:all .15s;margin-right:4px;}
-.act-btn:hover{border-color:var(--blue);color:var(--blue);}
-.act-btn.red:hover{border-color:#dc2626;color:#dc2626;}
-.no-data{text-align:center;padding:40px;color:var(--muted);font-size:13px;}
-.pg{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;border-top:1px solid var(--border);}
-.pg-info{font-size:12px;color:var(--muted);}
-.pg-btns{display:flex;gap:5px;}
-.pg-btn{width:30px;height:30px;border-radius:7px;border:1.5px solid var(--border);background:white;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;transition:all .15s;}
-.pg-btn:hover,.pg-btn.active{background:var(--blue);color:white;border-color:var(--blue);}
-
-.ov{display:none;position:fixed;inset:0;background:rgba(8,15,38,.65);backdrop-filter:blur(4px);z-index:200;align-items:center;justify-content:center;}
-.ov.show{display:flex;}
-.modal{background:white;border-radius:18px;padding:30px;width:560px;max-width:95vw;max-height:90vh;overflow-y:auto;animation:up .3s cubic-bezier(.16,1,.3,1);box-shadow:0 32px 64px rgba(0,0,0,.2);}
-@keyframes up{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
-.mt{font-family:'Syne',sans-serif;font-weight:700;font-size:18px;margin-bottom:4px;}
-.ms{font-size:13px;color:var(--muted);margin-bottom:20px;}
-.sep{height:1px;background:var(--border);margin:16px 0;}
-.dl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;}
-.dv{font-size:14px;font-weight:500;}
-.dg{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
-.ma{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;}
-.fg{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
-.f{margin-bottom:0;}
-.ff{grid-column:1/-1;}
-label{display:block;font-size:11px;font-weight:600;color:var(--muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:.06em;}
-input,select,textarea{width:100%;background:var(--light);border:1.5px solid var(--border);border-radius:9px;padding:10px 13px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;transition:border-color .2s;}
-input:focus,select:focus,textarea:focus{border-color:var(--blue);}
-textarea{resize:vertical;min-height:75px;}
-
-.import-zone{border:2px dashed var(--border);border-radius:11px;padding:28px;text-align:center;cursor:pointer;transition:all .2s;margin-bottom:16px;}
-.import-zone:hover,.import-zone.drag{border-color:var(--blue);background:var(--light);}
-.import-zone p{font-size:13px;color:var(--muted);margin-top:8px;}
-
-.toast{position:fixed;bottom:22px;right:22px;background:var(--navy);color:white;padding:11px 18px;border-radius:11px;font-size:13px;font-weight:500;box-shadow:0 8px 24px rgba(0,0,0,.2);z-index:999;opacity:0;transform:translateY(8px);transition:all .3s;pointer-events:none;}
-.toast.show{opacity:1;transform:translateY(0);}
-.toast.toast-err{background:#7F1D1D;}
+.ni.active{background:rgba(15,118,110,.25);}
+.sl-mark{background:linear-gradient(135deg,#0F766E,#0EA5E9);}
+.av{background:linear-gradient(135deg,#0F766E,#0EA5E9);}
+.sg{grid-template-columns:repeat(4,1fr);}
 </style>
 </head>
 <body>
-<script src="bd-data.js"></script>
-
 <aside class="sidebar">
   <div class="sl"><div class="sl-mark">IT</div><div class="sl-name">AODesk BD</div><div class="sl-role">IT / Admin</div></div>
   <nav>
-    <div class="ng">CRM</div>
-    <div class="ni active" onclick="showTab('crm',this)"><span class="ico">🗂</span>All Leads</div>
+    <div class="ng">Lead Generation</div>
+    <a class="ni active" onclick="showV('leads',this)"><span class="ico">🗂</span>All Leads</a>
     <div class="ng">Actions</div>
-    <div class="ni" onclick="openAdd()"><span class="ico">➕</span>Add New Lead</div>
-    <div class="ni" onclick="openImport()"><span class="ico">📥</span>Import Excel</div>
+    <a class="ni" onclick="openAdd()"><span class="ico">➕</span>Add Lead</a>
+    <a class="ni" onclick="openImport()"><span class="ico">📥</span>Import Excel</a>
   </nav>
   <div class="sf"><div class="uc"><div class="av" id="avI">IT</div><div><div class="un" id="uN">IT Admin</div><div class="ur">IT Access</div></div><button class="lob" onclick="logout()">⏻</button></div></div>
 </aside>
 
 <div class="main">
   <div class="topbar">
-    <div class="pt" id="pgTitle">CRM — All Leads</div>
+    <div class="pt">Lead Generation Management</div>
     <div style="display:flex;gap:8px">
       <button class="btn bt bsm" onclick="openImport()">📥 Import Excel</button>
       <button class="btn bp bsm" onclick="openAdd()">+ Add Lead</button>
@@ -122,52 +36,53 @@ textarea{resize:vertical;min-height:75px;}
   </div>
   <div class="content">
     <div class="sg">
-      <div class="sc"><div class="sl2">Total Leads</div><div class="sv teal" id="stTotal">0</div></div>
-      <div class="sc"><div class="sl2">New Leads</div><div class="sv" id="stNew">0</div></div>
-      <div class="sc"><div class="sl2">Active Pipeline</div><div class="sv" id="stActive">0</div></div>
-      <div class="sc"><div class="sl2">Closed Won</div><div class="sv" style="color:#15803D" id="stWon">0</div></div>
+      <div class="sc"><div class="sl2">Total Leads</div><div class="sv" id="stTotal" style="color:#0F766E">0</div></div>
+      <div class="sc"><div class="sl2">Not Called</div><div class="sv" id="stUncalled">0</div></div>
+      <div class="sc"><div class="sl2">Interested</div><div class="sv" id="stInt" style="color:#15803D">0</div></div>
+      <div class="sc"><div class="sl2">Appointed</div><div class="sv" id="stAppt" style="color:#2352E8">0</div></div>
     </div>
 
-    <div id="tab-crm">
+    <div id="v-leads">
       <div class="tcard">
         <div class="thead2">
-          <div class="tcard-title">All Leads</div>
+          <div class="tc-title">All Lead Gen Leads</div>
           <div class="tcontrols">
             <input class="srch" placeholder="🔍 Search..." id="srchIT" oninput="renderTable()"/>
-            <select class="flt" id="fltStIT" onchange="renderTable()"><option value="">All Stages</option></select>
-            <select class="flt" id="fltSrcIT" onchange="renderTable()"><option value="">All Sources</option></select>
-            <select class="flt" id="fltIndIT" onchange="renderTable()"><option value="">All Industries</option></select>
+            <select class="flt" id="fltInd" onchange="renderTable()"><option value="">All Industries</option></select>
+            <select class="flt" id="fltSrc" onchange="renderTable()"><option value="">All Sources</option></select>
+            <select class="flt" id="fltOut" onchange="renderTable()">
+              <option value="">All Outcomes</option>
+              <option value="none">Not Called</option>
+              <option>Interested</option><option>Callback</option>
+              <option>Not Interested</option><option>No Answer</option><option>Wrong Number</option>
+            </select>
           </div>
         </div>
         <div style="overflow-x:auto">
           <table>
-            <thead><tr><th>Company</th><th>Contact</th><th>Email</th><th>Phone</th><th>Industry</th><th>Source</th><th>Stage</th><th>Added By</th><th>Date</th><th>Actions</th></tr></thead>
-            <tbody id="tbIT"></tbody>
+            <thead><tr><th>Company</th><th>Contact</th><th>Email</th><th>Phone</th><th>Industry</th><th>Source</th><th>Call Outcome</th><th>Callback</th><th>Appointed</th><th>Added</th><th>Actions</th></tr></thead>
+            <tbody id="itBody"></tbody>
           </table>
         </div>
-        <div class="pg"><div class="pg-info" id="pgInfo"></div><div class="pg-btns" id="pgBtns"></div></div>
+        <div class="pg"><div class="pg-info" id="itPgInfo"></div><div class="pg-btns" id="itPgBtns"></div></div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ADD/EDIT MODAL -->
+<!-- ADD / EDIT MODAL -->
 <div class="ov" id="mLead">
   <div class="modal">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px"><div class="mt" id="mLeadT">Add New Lead</div><button onclick="closeModal('mLead')" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted);line-height:1">×</button></div>
-    <div class="ms">Fill in the CRM lead details.</div>
+    <div class="mh"><div class="mt2" id="mLeadTitle">Add New Lead</div><button class="mx" onclick="closeModal('mLead')">×</button></div>
     <div class="fg">
       <div class="f"><label>Company Name *</label><input type="text" id="lf_co" placeholder="Acme Pty Ltd"/></div>
       <div class="f"><label>Contact Person *</label><input type="text" id="lf_ct" placeholder="John Smith"/></div>
-      <div class="f"><label>Email</label><input type="email" id="lf_em" placeholder="john@acme.com.au"/></div>
+      <div class="f"><label>Email</label><input type="email" id="lf_em" placeholder="john@acme.com"/></div>
       <div class="f"><label>Phone</label><input type="text" id="lf_ph" placeholder="+61 4xx xxx xxx"/></div>
       <div class="f"><label>Industry</label><select id="lf_ind"><option value="">Select...</option></select></div>
-      <div class="f"><label>Lead Source</label><select id="lf_src"><option value="">Select...</option></select></div>
-      <div class="f"><label>Stage</label><select id="lf_st"><option value="">Select...</option></select></div>
-      <div class="f"><label>Meeting Type</label><select id="lf_mt"><option value="">None</option><option>Zoom</option><option>Phone</option><option>F2F</option></select></div>
-      <div class="f"><label>Meeting Date</label><input type="datetime-local" id="lf_md"/></div>
-      <div class="f"><label>Zoom Link</label><input type="url" id="lf_zl" placeholder="https://zoom.us/j/..."/></div>
-      <div class="f ff"><label>Notes</label><textarea id="lf_no"></textarea></div>
+      <div class="f"><label>Source</label><select id="lf_src"><option value="">Select...</option></select></div>
+      <div class="f"><label>Country</label><input type="text" id="lf_cn" placeholder="Australia" value="Australia"/></div>
+      <div class="f ff"><label>Notes</label><textarea id="lf_no" placeholder="Any context about this lead..."></textarea></div>
     </div>
     <div class="ma">
       <button class="btn bo" onclick="closeModal('mLead')">Cancel</button>
@@ -179,11 +94,12 @@ textarea{resize:vertical;min-height:75px;}
 <!-- DETAIL MODAL -->
 <div class="ov" id="mDetail">
   <div class="modal">
-    <div style="display:flex;justify-content:flex-end"><button onclick="closeModal('mDetail')" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted);line-height:1">×</button></div><div id="detailBody"></div>
+    <div class="mh"><div class="mt2" id="detailTitle">Lead Detail</div><button class="mx" onclick="closeModal('mDetail')">×</button></div>
+    <div id="detailBody"></div>
     <div class="ma">
       <button class="btn bo" onclick="closeModal('mDetail')">Close</button>
       <button class="btn bp" onclick="editFromDetail()">✏️ Edit</button>
-      <button class="btn bo" style="color:#dc2626;border-color:#fca5a5" onclick="delFromDetail()">🗑 Delete</button>
+      <button class="btn brd bsm" onclick="delFromDetail()">🗑 Delete</button>
     </div>
   </div>
 </div>
@@ -191,19 +107,19 @@ textarea{resize:vertical;min-height:75px;}
 <!-- IMPORT MODAL -->
 <div class="ov" id="mImport">
   <div class="modal">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px"><div class="mt">Import Leads from Excel</div><button onclick="closeModal('mImport')" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted);line-height:1">×</button></div>
-    <div class="ms">Supported columns: Company, Contact, Email, Phone, Industry, Source, Stage, Notes</div>
-    <div class="import-zone" id="dropZone" onclick="document.getElementById('xlsxFile').click()" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="handleDrop(event)">
+    <div class="mh"><div class="mt2">Import from Excel</div><button class="mx" onclick="closeModal('mImport')">×</button></div>
+    <div class="ms2">Columns: Company, Contact, Email, Phone, Industry, Source, Country, Notes</div>
+    <div class="import-zone" id="dropZone" onclick="document.getElementById('xlFile').click()" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="handleDrop(event)">
       <div style="font-size:32px">📥</div>
-      <p>Click or drag your <strong>.xlsx / .csv</strong> file here</p>
+      <p style="font-size:13px;color:var(--muted);margin-top:8px">Click or drag <strong>.xlsx / .csv</strong> here</p>
     </div>
-    <input type="file" id="xlsxFile" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleFile(this.files[0])"/>
+    <input type="file" id="xlFile" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleFile(this.files[0])"/>
     <div id="importPreview" style="display:none">
-      <div class="dl">Preview</div>
-      <div style="overflow-x:auto;margin-top:6px;border:1px solid var(--border);border-radius:9px;">
+      <div class="dl">Preview (first 5 rows)</div>
+      <div style="overflow-x:auto;margin-top:6px;border:1px solid var(--border);border-radius:9px">
         <table style="font-size:11px"><thead><tr id="prevHead"></tr></thead><tbody id="prevBody"></tbody></table>
       </div>
-      <p style="font-size:12px;color:var(--muted);margin-top:8px" id="importCount"></p>
+      <p style="font-size:12px;color:var(--muted);margin-top:6px" id="importCount"></p>
     </div>
     <div class="ma">
       <button class="btn bo" onclick="closeModal('mImport')">Cancel</button>
@@ -220,152 +136,123 @@ const user=getUser();
 document.getElementById('uN').textContent=user.name||'IT Admin';
 document.getElementById('avI').textContent=(user.name||'IT')[0].toUpperCase();
 
-let editId=null, detailId=null, importRows=[], curPage=1;
-const PER=15;
-let _leads = []; // ── cached leads array ──
+let _leads=[], editId=null, detailId=null, itPage=1, importRows=[];
+const PER=20;
 
-// Populate filters
-STAGES.forEach(s=>{['fltStIT','lf_st'].forEach(id=>{const o=document.createElement('option');o.value=s;o.textContent=s;document.getElementById(id).appendChild(o);});});
-SOURCES.forEach(s=>{['fltSrcIT','lf_src'].forEach(id=>{const o=document.createElement('option');o.value=s;o.textContent=s;document.getElementById(id).appendChild(o);});});
-INDUSTRIES.forEach(s=>{['fltIndIT','lf_ind'].forEach(id=>{const o=document.createElement('option');o.value=s;o.textContent=s;document.getElementById(id).appendChild(o);});});
+// populate selects
+INDUSTRIES.forEach(s=>{['fltInd','lf_ind'].forEach(id=>{const o=document.createElement('option');o.value=s;o.textContent=s;document.getElementById(id).appendChild(o);});});
+SOURCES.forEach(s=>{['fltSrc','lf_src'].forEach(id=>{const o=document.createElement('option');o.value=s;o.textContent=s;document.getElementById(id).appendChild(o);});});
 
-// ── LOAD & REFRESH ──
-async function loadLeads(){
+async function init(){
   showLoading('Loading leads...');
-  _leads = await getLeads();
+  _leads=await getLeadgen();
   hideLoading();
   renderStats();
   renderTable();
 }
 
+function showV(v,el){ document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active')); if(el)el.classList.add('active'); }
+
 function renderStats(){
   document.getElementById('stTotal').textContent=_leads.length;
-  document.getElementById('stNew').textContent=_leads.filter(l=>l.stage==='New Lead').length;
-  document.getElementById('stActive').textContent=_leads.filter(l=>!['Closed Won','Closed Lost'].includes(l.stage)).length;
-  document.getElementById('stWon').textContent=_leads.filter(l=>l.stage==='Closed Won').length;
+  document.getElementById('stUncalled').textContent=_leads.filter(l=>!l.call_outcome).length;
+  document.getElementById('stInt').textContent=_leads.filter(l=>l.call_outcome==='Interested').length;
+  document.getElementById('stAppt').textContent=_leads.filter(l=>l.appointed).length;
 }
 
 function renderTable(){
   const srch=document.getElementById('srchIT').value.toLowerCase();
-  const stF=document.getElementById('fltStIT').value;
-  const srcF=document.getElementById('fltSrcIT').value;
-  const indF=document.getElementById('fltIndIT').value;
+  const indF=document.getElementById('fltInd').value;
+  const srcF=document.getElementById('fltSrc').value;
+  const outF=document.getElementById('fltOut').value;
   let leads=[..._leads];
-  if(stF) leads=leads.filter(l=>l.stage===stF);
-  if(srcF) leads=leads.filter(l=>l.source===srcF);
   if(indF) leads=leads.filter(l=>l.industry===indF);
+  if(srcF) leads=leads.filter(l=>l.source===srcF);
+  if(outF==='none') leads=leads.filter(l=>!l.call_outcome);
+  else if(outF) leads=leads.filter(l=>l.call_outcome===outF);
   if(srch) leads=leads.filter(l=>(l.company+l.contact+l.email+l.phone).toLowerCase().includes(srch));
-  const total=leads.length; const start=(curPage-1)*PER; const slice=leads.slice(start,start+PER);
-  const tbody=document.getElementById('tbIT');
-  if(!slice.length){tbody.innerHTML='<tr><td colspan="10" class="no-data">No leads found.</td></tr>';document.getElementById('pgInfo').textContent='';document.getElementById('pgBtns').innerHTML='';return;}
+  const total=leads.length, start=(itPage-1)*PER, slice=leads.slice(start,start+PER);
+  const tbody=document.getElementById('itBody');
+  if(!slice.length){tbody.innerHTML='<tr><td colspan="11" class="no-data">No leads found.</td></tr>';document.getElementById('itPgInfo').textContent='';document.getElementById('itPgBtns').innerHTML='';return;}
   tbody.innerHTML=slice.map(l=>`<tr>
     <td><strong>${l.company}</strong></td>
     <td>${l.contact}</td>
     <td style="font-size:12px;color:var(--muted)">${l.email||'—'}</td>
     <td style="font-size:12px">${l.phone||'—'}</td>
     <td style="font-size:12px">${l.industry||'—'}</td>
-    <td>${l.source||'—'}</td>
-    <td>${stageBadge(l.stage)}</td>
-    <td style="font-size:11px;color:var(--muted)">${l.created_by||'—'}</td>
+    <td style="font-size:12px">${l.source||'—'}</td>
+    <td>${outcomeBadge(l.call_outcome)}</td>
+    <td style="font-size:12px">${l.callback_date?fmtDate(l.callback_date):'—'}</td>
+    <td>${l.appointed?'<span class="badge-valid">✅</span>':'—'}</td>
     <td style="font-size:11px;color:var(--muted)">${fmtDate(l.created_at)}</td>
-    <td><button class="act-btn" onclick="openDetail(${l.id})">View</button><button class="act-btn" onclick="openEdit(${l.id})">Edit</button><button class="act-btn red" onclick="del(${l.id})">Del</button></td>
+    <td>
+      <button class="act-btn" onclick="openDetail(${l.id})">View</button>
+      <button class="act-btn" onclick="openEdit(${l.id})">Edit</button>
+      <button class="act-btn red" onclick="del(${l.id})">Del</button>
+    </td>
   </tr>`).join('');
-  const totalPg=Math.ceil(total/PER)||1;
-  document.getElementById('pgInfo').textContent=`Showing ${Math.min(start+1,total)}–${Math.min(start+PER,total)} of ${total}`;
-  const pgc=document.getElementById('pgBtns'); pgc.innerHTML='';
-  for(let i=1;i<=totalPg;i++){const b=document.createElement('button');b.className='pg-btn'+(i===curPage?' active':'');b.textContent=i;b.onclick=()=>{curPage=i;renderTable();};pgc.appendChild(b);}
+  const tp=Math.ceil(total/PER)||1;
+  document.getElementById('itPgInfo').textContent=`Showing ${Math.min(start+1,total)}–${Math.min(start+PER,total)} of ${total}`;
+  const pgc=document.getElementById('itPgBtns');pgc.innerHTML='';
+  for(let i=1;i<=tp;i++){const b=document.createElement('button');b.className='pg-btn'+(i===itPage?' cur':'');b.textContent=i;b.onclick=()=>{itPage=i;renderTable();};pgc.appendChild(b);}
 }
 
-function openAdd(){ editId=null; document.getElementById('mLeadT').textContent='Add New Lead'; clearForm(); openModal('mLead'); }
+function openAdd(){ editId=null; document.getElementById('mLeadTitle').textContent='Add New Lead'; clearForm(); openModal('mLead'); }
 function openEdit(id){
-  editId=id;
+  editId=id; document.getElementById('mLeadTitle').textContent='Edit Lead';
   const l=_leads.find(x=>x.id==id); if(!l)return;
-  document.getElementById('mLeadT').textContent='Edit Lead';
   document.getElementById('lf_co').value=l.company||'';
   document.getElementById('lf_ct').value=l.contact||'';
   document.getElementById('lf_em').value=l.email||'';
   document.getElementById('lf_ph').value=l.phone||'';
   document.getElementById('lf_ind').value=l.industry||'';
   document.getElementById('lf_src').value=l.source||'';
-  document.getElementById('lf_st').value=l.stage||'New Lead';
-  document.getElementById('lf_mt').value=l.meeting_type||'';
-  document.getElementById('lf_md').value=l.meeting_date?new Date(l.meeting_date).toISOString().slice(0,16):'';
-  document.getElementById('lf_zl').value=l.zoom_link||'';
+  document.getElementById('lf_cn').value=l.country||'Australia';
   document.getElementById('lf_no').value=l.notes||'';
   openModal('mLead');
 }
 function editFromDetail(){ closeModal('mDetail'); openEdit(detailId); }
-function clearForm(){ ['lf_co','lf_ct','lf_em','lf_ph','lf_md','lf_zl','lf_no'].forEach(id=>document.getElementById(id).value='');['lf_ind','lf_src','lf_mt'].forEach(id=>document.getElementById(id).value='');document.getElementById('lf_st').value='New Lead'; }
+function clearForm(){ ['lf_co','lf_ct','lf_em','lf_ph','lf_no'].forEach(id=>document.getElementById(id).value=''); ['lf_ind','lf_src'].forEach(id=>document.getElementById(id).value=''); document.getElementById('lf_cn').value='Australia'; }
 
 async function saveLead(){
   const co=document.getElementById('lf_co').value.trim(), ct=document.getElementById('lf_ct').value.trim();
-  if(!co||!ct){showToast('Company and contact required','error');return;}
-  const data={
-    company:co, contact:ct,
-    email:document.getElementById('lf_em').value.trim(),
-    phone:document.getElementById('lf_ph').value.trim(),
-    industry:document.getElementById('lf_ind').value,
-    source:document.getElementById('lf_src').value,
-    stage:document.getElementById('lf_st').value||'New Lead',
-    meeting_type:document.getElementById('lf_mt').value||null,
-    meeting_date:document.getElementById('lf_md').value?new Date(document.getElementById('lf_md').value).toISOString():null,
-    zoom_link:document.getElementById('lf_zl').value.trim()||null,
-    notes:document.getElementById('lf_no').value.trim(),
-    bdm_notes:'',
-    created_by:user.email||'it@aodesk.com.au'
-  };
+  if(!co||!ct){showToast('Company and contact are required','error');return;}
+  const data={company:co,contact:ct,email:document.getElementById('lf_em').value.trim(),phone:document.getElementById('lf_ph').value.trim(),industry:document.getElementById('lf_ind').value,source:document.getElementById('lf_src').value,country:document.getElementById('lf_cn').value.trim()||'Australia',notes:document.getElementById('lf_no').value.trim(),created_by:user.email||'it@aodesk.com.au',created_at:new Date().toISOString()};
   showLoading(editId?'Updating...':'Saving...');
-  if(editId){
-    const updated = await updateLead(editId, data);
-    const i = _leads.findIndex(l=>l.id==editId);
-    if(i>-1) _leads[i]={..._leads[i],...data,...updated};
-    showToast(`"${co}" updated ✅`);
-  } else {
-    const saved = await addLead({...data, created_at:new Date().toISOString(), updated_at:new Date().toISOString()});
-    _leads.unshift(saved||data);
-    showToast(`"${co}" added ✅`);
-  }
-  hideLoading();
-  closeModal('mLead');
-  renderStats();
-  renderTable();
+  if(editId){ const u=await updateLeadgen(editId,data); const i=_leads.findIndex(l=>l.id==editId); if(i>-1)_leads[i]={..._leads[i],...data,...(u||{})}; showToast(`"${co}" updated ✅`); }
+  else { const saved=await addLeadgen(data); _leads.unshift(saved||data); showToast(`"${co}" added ✅`); }
+  hideLoading(); closeModal('mLead'); renderStats(); renderTable();
 }
 
-async function del(id){
-  const l=_leads.find(x=>x.id==id);
-  if(!confirm(`Delete "${l?.company}"? This cannot be undone.`)) return;
-  showLoading('Deleting...');
-  await deleteLead(id);
-  _leads=_leads.filter(l=>l.id!=id);
-  hideLoading();
-  renderStats();
-  renderTable();
-  showToast('Lead deleted');
-}
+async function del(id){ const l=_leads.find(x=>x.id==id); if(!confirm(`Delete "${l?.company}"?`))return; showLoading('Deleting...'); await deleteLeadgen(id); _leads=_leads.filter(l=>l.id!=id); hideLoading(); renderStats(); renderTable(); showToast('Lead deleted'); }
 function delFromDetail(){ closeModal('mDetail'); del(detailId); }
 
 function openDetail(id){
-  detailId=id;
-  const l=_leads.find(x=>x.id==id); if(!l)return;
+  detailId=id; const l=_leads.find(x=>x.id==id); if(!l)return;
+  document.getElementById('detailTitle').textContent=l.company;
   document.getElementById('detailBody').innerHTML=`
-    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px">
-      <div><div class="mt">${l.company}</div><div class="ms">${l.contact} · ${l.email||''}</div></div>${stageBadge(l.stage)}</div>
     <div class="dg">
+      <div><div class="dl">Contact</div><div class="dv">${l.contact}</div></div>
+      <div><div class="dl">Email</div><div class="dv">${l.email||'—'}</div></div>
       <div><div class="dl">Phone</div><div class="dv">${l.phone||'—'}</div></div>
       <div><div class="dl">Industry</div><div class="dv">${l.industry||'—'}</div></div>
       <div><div class="dl">Source</div><div class="dv">${l.source||'—'}</div></div>
-      <div><div class="dl">Meeting</div><div class="dv">${mtIcon(l.meeting_type)} ${l.meeting_type||'—'}</div></div>
-      <div><div class="dl">Meeting Date</div><div class="dv">${fmtDateTime(l.meeting_date)}</div></div>
-      <div><div class="dl">Added By</div><div class="dv" style="font-size:12px">${l.created_by||'—'}</div></div>
+      <div><div class="dl">Country</div><div class="dv">${l.country||'—'}</div></div>
     </div>
-    ${l.notes?`<div class="sep"></div><div class="dl">Notes</div><div class="dv" style="font-weight:400;line-height:1.6;margin-top:4px">${l.notes}</div>`:''}
-    ${l.bdm_notes?`<div class="sep"></div><div class="dl">BDM Notes</div><div class="dv" style="font-weight:400;line-height:1.6;color:#1D4ED8;margin-top:4px">${l.bdm_notes}</div>`:''}`;
+    ${l.notes?`<div class="dl">Notes</div><div class="dv" style="font-weight:400;margin-bottom:12px">${l.notes}</div>`:''}
+    <div class="sep"></div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+      <div class="dl" style="margin-bottom:0">Call Status</div>${outcomeBadge(l.call_outcome)}
+    </div>
+    ${l.call_notes?`<div class="dl">BDM Call Notes</div><div class="dv" style="font-weight:400;color:#1D4ED8">${l.call_notes}</div>`:''}
+    ${l.callback_date?`<div class="dl" style="margin-top:10px">Callback Date</div><div class="dv" style="color:#B45309">${fmtDateTime(l.callback_date)}</div>`:''}
+    <div style="margin-top:12px">${l.appointed?'<span class="badge-valid">✅ Appointment Set on Pipeline</span>':''}</div>`;
   openModal('mDetail');
 }
 
-// ── IMPORT ──
-function openImport(){ importRows=[];document.getElementById('importPreview').style.display='none';document.getElementById('importBtn').style.display='none';openModal('mImport'); }
-function handleDrop(e){ e.preventDefault();document.getElementById('dropZone').classList.remove('drag');const f=e.dataTransfer.files[0];if(f)handleFile(f); }
+// IMPORT
+function openImport(){ importRows=[]; document.getElementById('importPreview').style.display='none'; document.getElementById('importBtn').style.display='none'; openModal('mImport'); }
+function handleDrop(e){ e.preventDefault(); document.getElementById('dropZone').classList.remove('drag'); const f=e.dataTransfer.files[0]; if(f)handleFile(f); }
 function handleFile(file){
   const r=new FileReader();
   r.onload=e=>{
@@ -376,7 +263,7 @@ function handleFile(file){
     const body=document.getElementById('prevBody'); body.innerHTML='';
     if(importRows.length){
       Object.keys(importRows[0]).forEach(k=>{const th=document.createElement('th');th.textContent=k;th.style.cssText='padding:6px 10px;white-space:nowrap;';head.appendChild(th);});
-      importRows.slice(0,5).forEach(row=>{const tr=document.createElement('tr');Object.values(row).forEach(v=>{const td=document.createElement('td');td.textContent=v;td.style.cssText='padding:6px 10px;border-top:1px solid #eee;';tr.appendChild(td);});body.appendChild(tr);});
+      importRows.slice(0,5).forEach(row=>{const tr=document.createElement('tr');Object.values(row).forEach(v=>{const td=document.createElement('td');td.textContent=v;td.style.cssText='padding:5px 10px;border-top:1px solid #eee;';tr.appendChild(td);});body.appendChild(tr);});
     }
     document.getElementById('importCount').textContent=`${importRows.length} rows found.`;
     document.getElementById('importPreview').style.display='block';
@@ -385,28 +272,20 @@ function handleFile(file){
   r.readAsBinaryString(file);
 }
 async function doImport(){
-  if(!importRows.length) return;
-  const M={company:['company','Company','company name','Company Name'],contact:['contact','Contact','contact person','Contact Person','name','Name'],email:['email','Email'],phone:['phone','Phone','mobile','Mobile'],industry:['industry','Industry'],source:['source','Source','lead source','Lead Source'],stage:['stage','Stage'],notes:['notes','Notes']};
+  if(!importRows.length)return;
+  const M={company:['company','Company','Company Name'],contact:['contact','Contact','Contact Person','name','Name'],email:['email','Email'],phone:['phone','Phone','Mobile'],industry:['industry','Industry'],source:['source','Source'],country:['country','Country'],notes:['notes','Notes']};
   function get(row,keys){for(const k of keys){if(row[k]!==undefined&&row[k]!=='')return String(row[k]);}return '';}
   const now2=new Date().toISOString();
-  const batch=[];
-  importRows.forEach(row=>{
-    const co=get(row,M.company); if(!co)return;
-    const stage=get(row,M.stage)||'New Lead';
-    batch.push({company:co,contact:get(row,M.contact)||'—',email:get(row,M.email),phone:get(row,M.phone),industry:get(row,M.industry),source:get(row,M.source),stage:STAGES.includes(stage)?stage:'New Lead',notes:get(row,M.notes),meeting_type:null,meeting_date:null,zoom_link:null,bdm_notes:'',created_by:'it-import',created_at:now2,updated_at:now2});
-  });
+  const batch=importRows.filter(row=>get(row,M.company)).map(row=>({company:get(row,M.company),contact:get(row,M.contact)||'—',email:get(row,M.email),phone:get(row,M.phone),industry:get(row,M.industry),source:get(row,M.source),country:get(row,M.country)||'Australia',notes:get(row,M.notes),call_outcome:null,call_notes:'',callback_date:null,appointed:false,created_by:'it-import',created_at:now2}));
   showLoading(`Importing ${batch.length} leads...`);
-  await bulkInsertLeads(batch);
-  await loadLeads();
-  closeModal('mImport');
+  await bulkInsertLeadgen(batch);
+  _leads=(await getLeadgen());
+  hideLoading(); closeModal('mImport'); renderStats(); renderTable();
   showToast(`${batch.length} leads imported ✅`);
 }
 
-function showTab(tab,el){document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));if(el)el.classList.add('active');}
 document.querySelectorAll('.ov').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('show');}));
-
-// ── INIT ──
-loadLeads();
+init();
 </script>
 </body>
 </html>
