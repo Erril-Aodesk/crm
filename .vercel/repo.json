@@ -1,0 +1,11 @@
+{
+  "remoteName": "origin",
+  "projects": [
+    {
+      "id": "prj_rJuKy3xtGHlcNgaToroVuivxelKO",
+      "name": "crm",
+      "directory": ".",
+      "orgId": "team_uqN8dHFRZE4odyLelgjdjVVb"
+    }
+  ]
+}

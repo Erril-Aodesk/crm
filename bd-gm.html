@@ -3,108 +3,345 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>AODesk BD — Login</title>
+<title>AODesk BD — GM Dashboard</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet"/>
+<script src="bd-data.js"></script>
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'DM Sans',sans-serif;background:#080F26;min-height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;}
-canvas{position:absolute;inset:0;opacity:.4;pointer-events:none;}
-.card{position:relative;z-index:2;width:440px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:28px;padding:48px 42px;backdrop-filter:blur(24px);box-shadow:0 40px 80px rgba(0,0,0,.5);animation:up .5s cubic-bezier(.16,1,.3,1);}
-@keyframes up{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-.brand{display:flex;align-items:center;gap:12px;margin-bottom:36px;}
-.bmark{width:44px;height:44px;background:linear-gradient(135deg,#2352E8,#3B82F6);border-radius:12px;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:20px;color:white;box-shadow:0 8px 20px rgba(35,82,232,.4);}
-.btext{font-family:'Syne',sans-serif;font-weight:700;font-size:16px;color:white;line-height:1.1;}
-.btext span{display:block;font-size:10px;font-weight:400;color:rgba(255,255,255,.35);letter-spacing:.07em;text-transform:uppercase;margin-top:2px;}
-h1{font-family:'Syne',sans-serif;font-weight:800;font-size:26px;color:white;margin-bottom:6px;}
-.sub{font-size:13px;color:rgba(255,255,255,.4);margin-bottom:28px;}
-.demo-box{background:rgba(239,165,0,.08);border:1px solid rgba(239,165,0,.2);border-radius:10px;padding:12px 14px;font-size:12px;color:rgba(239,165,0,.85);margin-bottom:22px;line-height:1.8;}
-.roles{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;margin-bottom:24px;}
-.role{border:1.5px solid rgba(255,255,255,.08);border-radius:12px;padding:13px 10px;background:rgba(255,255,255,.02);cursor:pointer;text-align:center;transition:all .2s;}
-.role-icon{font-size:22px;display:block;margin-bottom:5px;}
-.role-label{font-size:11px;font-weight:500;color:rgba(255,255,255,.45);transition:color .2s;}
-.role:hover{border-color:rgba(35,82,232,.5);}
-.role.active{border-color:#2352E8;background:rgba(35,82,232,.15);}
-.role.active .role-label{color:white;}
-.field{margin-bottom:16px;}
-label{display:block;font-size:11px;font-weight:500;color:rgba(255,255,255,.4);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em;}
-input{width:100%;background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.08);border-radius:10px;padding:13px 16px;color:white;font-family:'DM Sans',sans-serif;font-size:14px;outline:none;transition:border-color .2s;}
-input:focus{border-color:#2352E8;}
-input::placeholder{color:rgba(255,255,255,.2);}
-.btn-login{width:100%;margin-top:6px;background:linear-gradient(135deg,#2352E8,#3B82F6);color:white;border:none;border-radius:11px;padding:14px;font-family:'Syne',sans-serif;font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 6px 24px rgba(35,82,232,.4);transition:all .15s;}
-.btn-login:hover{transform:translateY(-1px);box-shadow:0 10px 32px rgba(35,82,232,.5);}
-.err{display:none;background:rgba(220,38,38,.1);border:1px solid rgba(220,38,38,.25);color:#FCA5A5;border-radius:9px;padding:10px 14px;font-size:13px;margin-top:12px;text-align:center;}
-.err.show{display:block;}
-.footer{margin-top:28px;text-align:center;font-size:11px;color:rgba(255,255,255,.12);}
+.ni.active{background:rgba(35,82,232,.25);}
+.sl-mark{background:linear-gradient(135deg,#2352E8,#3B82F6);}
+.av{background:linear-gradient(135deg,#2352E8,#3B82F6);}
+.sg{grid-template-columns:repeat(5,1fr);}
+/* PIPELINE */
+.board{display:flex;gap:12px;overflow-x:auto;padding-bottom:8px;}
+.col{min-width:190px;flex-shrink:0;}
+.ch{padding:10px 12px;border-radius:9px 9px 0 0;font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.cc{background:rgba(255,255,255,.35);border-radius:20px;padding:2px 8px;font-size:10px;}
+.cards{display:flex;flex-direction:column;gap:8px;min-height:160px;}
+.lcard{background:white;border-radius:10px;padding:13px;border:1px solid var(--border);cursor:pointer;transition:all .15s;box-shadow:0 1px 3px rgba(0,0,0,.04);}
+.lcard:hover{box-shadow:0 4px 14px rgba(0,0,0,.1);transform:translateY(-1px);}
+.lc-co{font-size:13px;font-weight:600;margin-bottom:3px;}
+.lc-ct{font-size:11px;color:var(--muted);}
+.lc-foot{display:flex;align-items:center;justify-content:space-between;margin-top:8px;}
+.lc-dt{font-size:10px;color:var(--muted);margin-top:4px;}
+.ecol{border:2px dashed var(--border);border-radius:9px;padding:16px;text-align:center;color:var(--muted);font-size:11px;}
+/* CALENDAR */
+.cal-wrap{background:white;border-radius:14px;border:1px solid var(--border);overflow:hidden;}
+.cal-hdr{padding:16px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);}
+.cal-title{font-family:'Syne',sans-serif;font-weight:700;font-size:17px;}
+.cal-nav{display:flex;gap:8px;align-items:center;}
+.cal-nb{width:32px;height:32px;border-radius:8px;border:1.5px solid var(--border);background:white;cursor:pointer;font-size:15px;transition:all .15s;display:flex;align-items:center;justify-content:center;}
+.cal-nb:hover{border-color:var(--blue);color:var(--blue);}
+.cal-dow{display:grid;grid-template-columns:repeat(7,1fr);border-bottom:1px solid var(--border);}
+.cal-dow div{padding:9px;text-align:center;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);}
+.cal-day{min-height:90px;padding:7px;border-right:1px solid var(--border);border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s;position:relative;}
+.cal-day:hover{background:var(--light);}
+.cal-day:nth-child(7n){border-right:none;}
+.cal-day.other .dn{color:#CBD5E1;}
+.cal-day.today .dn{background:var(--blue);color:white;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;}
+.dn{font-size:12px;font-weight:600;margin-bottom:4px;width:24px;height:24px;display:flex;align-items:center;justify-content:center;}
+.ce{font-size:10px;padding:2px 5px;border-radius:4px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;}
+.ce.zoom{background:rgba(35,82,232,.12);color:var(--blue);}
+.ce.phone{background:rgba(16,185,129,.12);color:#059669;}
+.ce.f2f{background:rgba(239,165,0,.12);color:#B45309;}
+/* STAGE MOVER */
+.sm{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;}
+.sp{padding:5px 12px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;border:1.5px solid var(--border);background:white;color:var(--muted);transition:all .15s;}
+.sp:hover,.sp.cur{background:var(--blue);color:white;border-color:var(--blue);}
+/* SET MEETING FORM */
+.meet-form{background:var(--light);border-radius:12px;padding:16px;margin-top:14px;}
 </style>
 </head>
 <body>
-<canvas id="c"></canvas>
-<div class="card">
-  <div class="brand">
-    <div class="bmark">A</div>
-    <div class="btext">AODesk BD Portal<span>Business Development System</span></div>
+<aside class="sidebar">
+  <div class="sl"><div class="sl-mark">A</div><div class="sl-name">AODesk BD</div><div class="sl-role">General Manager</div></div>
+  <nav>
+    <div class="ng">Pipeline</div>
+    <a class="ni active" onclick="showV('pipeline',this)"><span class="ico">📊</span>Pipeline Board</a>
+    <a class="ni" onclick="showV('calendar',this)"><span class="ico">📅</span>Calendar</a>
+    <div class="ng">CRM</div>
+    <a class="ni" onclick="showV('crm',this)"><span class="ico">✅</span>All Appointments</a>
+  </nav>
+  <div class="sf"><div class="uc"><div class="av" id="avI">G</div><div><div class="un" id="uN">GM</div><div class="ur">GM Access</div></div><button class="lob" onclick="logout()">⏻</button></div></div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <div class="pt" id="pgTitle">Pipeline Board</div>
+    <div style="display:flex;gap:8px">
+      <button class="btn bo bsm" onclick="showV('calendar',null)">📅 Calendar</button>
+      <button class="btn bp bsm" onclick="showV('crm',null)">✅ Appointments</button>
+    </div>
   </div>
-  <h1>Sign in</h1>
-  <p class="sub">Select your role and enter your credentials.</p>
-  <div class="demo-box">
-    🎯 <strong>Demo accounts</strong><br/>
-    👔 GM &nbsp;— gm@aodesk.com.au / gm1234<br/>
-    📈 BDM — bdm@aodesk.com.au / bdm1234<br/>
-    💻 IT &nbsp;&nbsp;— it@aodesk.com.au / it1234
+  <div class="content">
+    <!-- STATS -->
+    <div class="sg">
+      <div class="sc"><div class="sl2">Pipeline Total</div><div class="sv" id="stTotal" style="color:var(--blue)">0</div></div>
+      <div class="sc"><div class="sl2">⚠️ Pending Review</div><div class="sv" id="stPending" style="color:#B45309">0</div></div>
+      <div class="sc"><div class="sl2">✅ Valid</div><div class="sv" id="stValid" style="color:#15803D">0</div></div>
+      <div class="sc"><div class="sl2">Meetings This Week</div><div class="sv" id="stMeet">0</div></div>
+      <div class="sc"><div class="sl2">🎉 Closed Won</div><div class="sv" id="stWon" style="color:#15803D">0</div></div>
+    </div>
+
+    <!-- PIPELINE VIEW -->
+    <div id="v-pipeline">
+      <div class="board" id="board"></div>
+    </div>
+
+    <!-- CALENDAR VIEW -->
+    <div id="v-calendar" style="display:none">
+      <div class="cal-wrap">
+        <div class="cal-hdr">
+          <div class="cal-nav">
+            <button class="cal-nb" onclick="changeMonth(-1)">‹</button>
+            <div class="cal-title" id="calTitle"></div>
+            <button class="cal-nb" onclick="changeMonth(1)">›</button>
+          </div>
+        </div>
+        <div class="cal-dow"><div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div></div>
+        <div class="cal-grid" id="calGrid"></div>
+      </div>
+    </div>
+
+    <!-- CRM VIEW -->
+    <div id="v-crm" style="display:none">
+      <div class="tcard">
+        <div class="thead2">
+          <div class="tc-title">All Pipeline Appointments</div>
+          <div class="tcontrols">
+            <input class="srch" placeholder="🔍 Search..." id="crmSrch" oninput="renderCRM()"/>
+            <select class="flt" id="crmStage" onchange="renderCRM()"><option value="">All Stages</option></select>
+            <select class="flt" id="crmValid" onchange="renderCRM()">
+              <option value="">All Status</option>
+              <option value="null">⚠️ Pending</option>
+              <option value="true">✅ Valid</option>
+              <option value="false">❌ Invalid</option>
+            </select>
+          </div>
+        </div>
+        <div style="overflow-x:auto">
+          <table>
+            <thead><tr><th>Company</th><th>Contact</th><th>Industry</th><th>Stage</th><th>Meeting</th><th>Date</th><th>Zoom</th><th>BDM Notes</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="crmBody"></tbody>
+          </table>
+        </div>
+        <div class="pg"><div class="pg-info" id="crmPgInfo"></div><div class="pg-btns" id="crmPgBtns"></div></div>
+      </div>
+    </div>
   </div>
-  <div class="roles">
-    <div class="role active" onclick="pick('gm',this)"><span class="role-icon">👔</span><div class="role-label">General Manager</div></div>
-    <div class="role" onclick="pick('bdm',this)"><span class="role-icon">📈</span><div class="role-label">BD Manager</div></div>
-    <div class="role" onclick="pick('it',this)"><span class="role-icon">💻</span><div class="role-label">IT / Admin</div></div>
-  </div>
-  <div class="field"><label>Email</label><input type="email" id="email" placeholder="you@aodesk.com.au"/></div>
-  <div class="field"><label>Password</label><input type="password" id="pw" placeholder="••••••••" onkeydown="if(event.key==='Enter')login()"/></div>
-  <button class="btn-login" id="loginBtn" onclick="login()">Sign In →</button>
-  <div class="err" id="err"></div>
-  <div class="footer">Australian Outsource Desk Inc. · Confidential</div>
 </div>
+
+<!-- LEAD DETAIL MODAL -->
+<div class="ov" id="mDetail">
+  <div class="modal" style="width:620px">
+    <div class="mh"><div class="mt2" id="detailTitle">Lead Detail</div><button class="mx" onclick="closeModal('mDetail')">×</button></div>
+    <div id="detailBody"></div>
+    <div class="sep"></div>
+    <div class="dl">Move Stage</div>
+    <div class="sm" id="stageMover"></div>
+    <div class="sep"></div>
+    <div class="dl">Set / Update Meeting</div>
+    <div class="meet-form">
+      <div class="fg" style="margin-bottom:12px">
+        <div class="f"><label>Meeting Type</label><select id="dm_type"><option value="">Select...</option><option>Zoom</option><option>Phone</option><option>F2F</option></select></div>
+        <div class="f"><label>Date & Time</label><input type="datetime-local" id="dm_date"/></div>
+        <div class="f ff"><label>Zoom Link (optional)</label><input type="url" id="dm_zoom" placeholder="https://zoom.us/j/..."/></div>
+      </div>
+      <button class="btn bp bsm" onclick="saveMeeting()">💾 Save Meeting</button>
+    </div>
+    <div class="ma">
+      <button class="btn bo" onclick="closeModal('mDetail')">Close</button>
+      <button class="btn brd bsm" id="markInvalidBtn" onclick="markValid(false)">❌ Mark Invalid</button>
+      <button class="btn bt bsm" id="markValidBtn" onclick="markValid(true)">✅ Mark Valid</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
 <script>
-const SUPABASE_URL='https://ioizmqqujnypodawlmag.supabase.co';
-const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlvaXptcXF1am55cG9kYXdsbWFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3MjU2NjQsImV4cCI6MjA5NTMwMTY2NH0.Uyp-D9LalhWs2J4vesZbEKsIQCDCWKWI9BKD9Zck_No';
-const DEMO={'gm@aodesk.com.au':{pass:'gm1234',role:'gm',name:'General Manager'},'bdm@aodesk.com.au':{pass:'bdm1234',role:'bdm',name:'BD Manager'},'it@aodesk.com.au':{pass:'it1234',role:'it',name:'IT Admin'}};
-const PAGES={gm:'bd-gm.html',bdm:'bd-bdm.html',it:'bd-it.html'};
-let role='gm';
-function pick(r,el){role=r;document.querySelectorAll('.role').forEach(x=>x.classList.remove('active'));el.classList.add('active');}
-async function login(){
-  const email=document.getElementById('email').value.trim(), pw=document.getElementById('pw').value;
-  const err=document.getElementById('err'), btn=document.getElementById('loginBtn');
-  err.classList.remove('show');
-  if(!email||!pw){showErr('Please enter email and password.');return;}
-  btn.textContent='Signing in...';btn.disabled=true;
-  if(DEMO[email]){
-    if(pw!==DEMO[email].pass){showErr('Incorrect password.');btn.textContent='Sign In →';btn.disabled=false;return;}
-    if(DEMO[email].role!==role){showErr(`This account is for the ${DEMO[email].name} role.`);btn.textContent='Sign In →';btn.disabled=false;return;}
-    localStorage.removeItem('bd_leadgen');localStorage.removeItem('bd_pipeline');
-    sessionStorage.setItem('bd_token','demo_token');
-    sessionStorage.setItem('bd_role',DEMO[email].role);
-    sessionStorage.setItem('bd_user',JSON.stringify({email,name:DEMO[email].name}));
-    window.location.href=PAGES[DEMO[email].role];return;
-  }
-  try{
-    const res=await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`,{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY},body:JSON.stringify({email,password:pw})});
-    const data=await res.json();
-    if(!res.ok)throw new Error(data.error_description||'Login failed');
-    const userRole=data.user?.user_metadata?.role;
-    if(!userRole)throw new Error('No role assigned. Contact administrator.');
-    if(userRole!==role)throw new Error(`This account is for the ${userRole.toUpperCase()} role.`);
-    sessionStorage.setItem('bd_token',data.access_token);
-    sessionStorage.setItem('bd_role',userRole);
-    sessionStorage.setItem('bd_user',JSON.stringify({email:data.user.email,name:data.user.user_metadata?.full_name||email.split('@')[0]}));
-    window.location.href=PAGES[userRole]||'bd-gm.html';
-  }catch(e){showErr(e.message);btn.textContent='Sign In →';btn.disabled=false;}
+authGuard(['gm']);
+const user=getUser();
+document.getElementById('uN').textContent=user.name||'General Manager';
+document.getElementById('avI').textContent=(user.name||'G')[0].toUpperCase();
+
+let _pipe=[], detailId=null, calY=new Date().getFullYear(), calM=new Date().getMonth(), crmPage=1;
+const PER=15;
+
+// populate stage filter
+PIPELINE_STAGES.forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s;document.getElementById('crmStage').appendChild(o);});
+
+async function init(){
+  showLoading('Loading pipeline...');
+  _pipe = await getPipeline();
+  hideLoading();
+  renderAll();
 }
-function showErr(msg){const e=document.getElementById('err');e.textContent=msg;e.classList.add('show');}
-// particles
-const c=document.getElementById('c'),ctx=c.getContext('2d');let W,H,pts=[];
-function resize(){W=c.width=innerWidth;H=c.height=innerHeight;pts=Array.from({length:55},()=>({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.3,vy:(Math.random()-.5)*.3}));}
-resize();window.addEventListener('resize',resize);
-function draw(){ctx.clearRect(0,0,W,H);pts.forEach(p=>{p.x+=p.vx;p.y+=p.vy;if(p.x<0||p.x>W)p.vx*=-1;if(p.y<0||p.y>H)p.vy*=-1;ctx.beginPath();ctx.arc(p.x,p.y,1.5,0,Math.PI*2);ctx.fillStyle='rgba(59,130,246,.5)';ctx.fill();});pts.forEach((a,i)=>pts.slice(i+1).forEach(b=>{const d=Math.hypot(a.x-b.x,a.y-b.y);if(d<120){ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.strokeStyle=`rgba(59,130,246,${.15*(1-d/120)})`;ctx.stroke();}}));requestAnimationFrame(draw);}
-draw();
+
+function renderAll(){ renderStats(); renderPipeline(); if(document.getElementById('v-calendar').style.display!=='none') renderCal(); if(document.getElementById('v-crm').style.display!=='none') renderCRM(); }
+
+function showV(v,el){
+  ['pipeline','calendar','crm'].forEach(id=>document.getElementById('v-'+id).style.display='none');
+  document.getElementById('v-'+v).style.display='block';
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
+  if(el) el.classList.add('active');
+  const titles={pipeline:'Pipeline Board',calendar:'Meeting Calendar',crm:'All Appointments'};
+  document.getElementById('pgTitle').textContent=titles[v];
+  if(v==='calendar') renderCal();
+  if(v==='crm') renderCRM();
+}
+
+// ── STATS ──
+function renderStats(){
+  const now=new Date();
+  document.getElementById('stTotal').textContent=_pipe.length;
+  document.getElementById('stPending').textContent=_pipe.filter(l=>l.valid===null||l.valid===undefined).length;
+  document.getElementById('stValid').textContent=_pipe.filter(l=>l.valid===true).length;
+  const ws=new Date();ws.setDate(now.getDate()-now.getDay());ws.setHours(0,0,0,0);
+  const we=new Date(ws);we.setDate(we.getDate()+7);
+  document.getElementById('stMeet').textContent=_pipe.filter(l=>l.meeting_date&&new Date(l.meeting_date)>=ws&&new Date(l.meeting_date)<we).length;
+  document.getElementById('stWon').textContent=_pipe.filter(l=>l.stage==='Closed Won').length;
+}
+
+// ── PIPELINE BOARD ──
+function renderPipeline(){
+  const board=document.getElementById('board'); board.innerHTML='';
+  PIPELINE_STAGES.forEach(stage=>{
+    const sl=_pipe.filter(l=>l.stage===stage);
+    const m=STAGE_META[stage];
+    const col=document.createElement('div'); col.className='col';
+    col.innerHTML=`<div class="ch" style="background:linear-gradient(135deg,${m.bg},${m.bg}bb);color:${m.color}">
+      <span>${m.icon} ${stage}</span><span class="cc">${sl.length}</span></div>
+      <div class="cards">${sl.length?sl.map(l=>`
+        <div class="lcard" onclick="openDetail(${l.id})">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between">
+            <div class="lc-co">${l.company}</div>
+            ${l.valid===null||l.valid===undefined?'<span class="badge-pending">⚠️</span>':l.valid?'<span class="badge-valid">✅</span>':'<span class="badge-invalid">❌</span>'}
+          </div>
+          <div class="lc-ct">${l.contact}</div>
+          ${l.meeting_date?`<div class="lc-dt">📅 ${fmtDate(l.meeting_date,true)} ${mtIcon(l.meeting_type)}</div>`:'<div class="lc-dt" style="color:#F59E0B">⚠️ No meeting set</div>'}
+        </div>`).join(''):'<div class="ecol">No leads</div>'}
+      </div>`;
+    board.appendChild(col);
+  });
+}
+
+// ── CALENDAR ──
+function renderCal(){
+  document.getElementById('calTitle').textContent=new Date(calY,calM).toLocaleDateString('en-AU',{month:'long',year:'numeric'});
+  const first=new Date(calY,calM,1), last=new Date(calY,calM+1,0);
+  const grid=document.getElementById('calGrid'); grid.innerHTML='';
+  const dayMap={};
+  _pipe.forEach(l=>{ if(!l.meeting_date) return; const k=localDateStr(l.meeting_date); if(!dayMap[k])dayMap[k]=[]; dayMap[k].push(l); });
+  const start=first.getDay(), allDays=[];
+  for(let i=0;i<start;i++) allDays.push({d:new Date(calY,calM,1-(start-i)),other:true});
+  for(let d=1;d<=last.getDate();d++) allDays.push({d:new Date(calY,calM,d),other:false});
+  const rem=42-allDays.length; for(let i=1;i<=rem;i++) allDays.push({d:new Date(calY,calM+1,i),other:true});
+  allDays.forEach(({d,other})=>{
+    const k=localDateStr(d), isToday=k===localDateStr(new Date());
+    const dl=(dayMap[k]||[]).sort((a,b)=>new Date(a.meeting_date)-new Date(b.meeting_date));
+    const div=document.createElement('div');
+    div.className='cal-day'+(other?' other':'')+(isToday?' today':'');
+    div.innerHTML=`<div class="dn">${d.getDate()}</div>
+      ${dl.slice(0,3).map(l=>`<div class="ce ${(l.meeting_type||'').toLowerCase()}" onclick="event.stopPropagation();openDetail(${l.id})" title="${l.company} ${fmtTime(l.meeting_date)}">
+        <span style="font-size:9px;opacity:.75">${fmtTime(l.meeting_date)}</span> ${l.company}</div>`).join('')}
+      ${dl.length>3?`<div style="font-size:10px;color:var(--muted);padding:2px 4px">+${dl.length-3} more</div>`:''}`;
+    grid.appendChild(div);
+  });
+}
+function changeMonth(d){ calM+=d; if(calM>11){calM=0;calY++;}if(calM<0){calM=11;calY--;} renderCal(); }
+
+// ── CRM TABLE ──
+function renderCRM(){
+  const srch=document.getElementById('crmSrch').value.toLowerCase();
+  const stF=document.getElementById('crmStage').value;
+  const vF=document.getElementById('crmValid').value;
+  let leads=[..._pipe];
+  if(stF) leads=leads.filter(l=>l.stage===stF);
+  if(vF==='null') leads=leads.filter(l=>l.valid===null||l.valid===undefined);
+  else if(vF==='true') leads=leads.filter(l=>l.valid===true);
+  else if(vF==='false') leads=leads.filter(l=>l.valid===false);
+  if(srch) leads=leads.filter(l=>(l.company+l.contact+l.email).toLowerCase().includes(srch));
+  const total=leads.length, start=(crmPage-1)*PER, slice=leads.slice(start,start+PER);
+  const tbody=document.getElementById('crmBody');
+  if(!slice.length){tbody.innerHTML='<tr><td colspan="10" class="no-data">No appointments found.</td></tr>';document.getElementById('crmPgInfo').textContent='';document.getElementById('crmPgBtns').innerHTML='';return;}
+  tbody.innerHTML=slice.map(l=>`<tr>
+    <td><strong>${l.company}</strong></td>
+    <td>${l.contact}<br><span style="font-size:11px;color:var(--muted)">${l.email||''}</span></td>
+    <td>${l.industry||'—'}</td>
+    <td>${stageBadge(l.stage)}</td>
+    <td>${mtIcon(l.meeting_type)} ${l.meeting_type||'—'}</td>
+    <td>${fmtDateTime(l.meeting_date)}</td>
+    <td>${l.zoom_link?`<a href="${l.zoom_link}" target="_blank" style="color:var(--blue);font-size:11px">🔗 Join</a>`:'—'}</td>
+    <td style="max-width:140px;font-size:11px;color:#1D4ED8">${l.bdm_notes||'—'}</td>
+    <td>${l.valid===null||l.valid===undefined?'<span class="badge-pending">⚠️ Pending</span>':l.valid?'<span class="badge-valid">✅ Valid</span>':'<span class="badge-invalid">❌ Invalid</span>'}</td>
+    <td><button class="act-btn" onclick="openDetail(${l.id})">View</button></td>
+  </tr>`).join('');
+  const tp=Math.ceil(total/PER)||1;
+  document.getElementById('crmPgInfo').textContent=`Showing ${Math.min(start+1,total)}–${Math.min(start+PER,total)} of ${total}`;
+  const pgc=document.getElementById('crmPgBtns');pgc.innerHTML='';
+  for(let i=1;i<=tp;i++){const b=document.createElement('button');b.className='pg-btn'+(i===crmPage?' cur':'');b.textContent=i;b.onclick=()=>{crmPage=i;renderCRM();};pgc.appendChild(b);}
+}
+
+// ── DETAIL MODAL ──
+function openDetail(id){
+  detailId=id;
+  const l=_pipe.find(x=>x.id==id); if(!l)return;
+  document.getElementById('detailTitle').textContent=l.company;
+  document.getElementById('detailBody').innerHTML=`
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+      ${stageBadge(l.stage)}
+      ${l.valid===null||l.valid===undefined?'<span class="badge-pending">⚠️ Pending Review</span>':l.valid?'<span class="badge-valid">✅ Valid</span>':'<span class="badge-invalid">❌ Invalid</span>'}
+    </div>
+    <div class="dg">
+      <div><div class="dl">Contact</div><div class="dv">${l.contact}</div></div>
+      <div><div class="dl">Email</div><div class="dv">${l.email||'—'}</div></div>
+      <div><div class="dl">Phone</div><div class="dv">${l.phone||'—'}</div></div>
+      <div><div class="dl">Industry</div><div class="dv">${l.industry||'—'}</div></div>
+      <div><div class="dl">Meeting Type</div><div class="dv">${mtIcon(l.meeting_type)} ${l.meeting_type||'—'}</div></div>
+      <div><div class="dl">Meeting Date</div><div class="dv">${fmtDateTime(l.meeting_date)}</div></div>
+    </div>
+    ${l.zoom_link?`<div class="dl">Zoom Link</div><div class="dv" style="margin-bottom:12px"><a href="${l.zoom_link}" target="_blank" style="color:var(--blue)">🔗 ${l.zoom_link}</a></div>`:''}
+    ${l.notes?`<div class="dl">Notes</div><div class="dv" style="margin-bottom:12px;font-weight:400">${l.notes}</div>`:''}
+    ${l.bdm_notes?`<div class="dl">BDM Notes</div><div class="dv" style="color:#1D4ED8;font-weight:400">${l.bdm_notes}</div>`:''}`;
+  // Stage mover
+  const sm=document.getElementById('stageMover'); sm.innerHTML='';
+  PIPELINE_STAGES.forEach(s=>{const b=document.createElement('button');b.className='sp'+(s===l.stage?' cur':'');b.innerHTML=`${STAGE_META[s].icon} ${s}`;b.onclick=()=>moveStage(id,s);sm.appendChild(b);});
+  // Pre-fill meeting form
+  document.getElementById('dm_type').value=l.meeting_type||'';
+  document.getElementById('dm_date').value=l.meeting_date?new Date(l.meeting_date).toISOString().slice(0,16):'';
+  document.getElementById('dm_zoom').value=l.zoom_link||'';
+  // Valid/invalid buttons
+  document.getElementById('markValidBtn').style.display=l.valid===true?'none':'inline-flex';
+  document.getElementById('markInvalidBtn').style.display=l.valid===false?'none':'inline-flex';
+  openModal('mDetail');
+}
+
+async function moveStage(id,stage){
+  await updatePipeline(id,{stage});
+  const i=_pipe.findIndex(l=>l.id==id); if(i>-1)_pipe[i].stage=stage;
+  renderAll(); openDetail(id); showToast(`Moved to "${stage}"`);
+}
+
+async function saveMeeting(){
+  const type=document.getElementById('dm_type').value;
+  const date=document.getElementById('dm_date').value;
+  const zoom=document.getElementById('dm_zoom').value.trim();
+  if(!type||!date){showToast('Select meeting type and date','error');return;}
+  const patch={meeting_type:type,meeting_date:new Date(date).toISOString(),zoom_link:zoom||null};
+  await updatePipeline(detailId,patch);
+  const i=_pipe.findIndex(l=>l.id==detailId); if(i>-1)_pipe[i]={..._pipe[i],...patch};
+  renderAll(); openDetail(detailId); showToast('Meeting saved ✅');
+}
+
+async function markValid(val){
+  await updatePipeline(detailId,{valid:val});
+  const i=_pipe.findIndex(l=>l.id==detailId); if(i>-1)_pipe[i].valid=val;
+  renderAll(); openDetail(detailId);
+  showToast(val?'Marked as Valid ✅':'Marked as Invalid ❌');
+}
+
+document.querySelectorAll('.ov').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('show');}));
+init();
 </script>
 </body>
 </html>
