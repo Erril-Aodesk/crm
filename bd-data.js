@@ -58,8 +58,14 @@ async function sbLogin(email, password) {
   return data;
 }
 
-// ── LEADS CRUD (Supabase) ──
+// ── LEADS CRUD (Supabase with demo fallback) ──
 async function getLeads() {
+  // Demo mode — use localStorage with pre-loaded demo data
+  if(sessionStorage.getItem('bd_token') === 'demo_token') {
+    const raw = localStorage.getItem('bd_leads');
+    if(!raw) { localStorage.setItem('bd_leads', JSON.stringify(DEMO_LEADS)); return JSON.parse(JSON.stringify(DEMO_LEADS)); }
+    return JSON.parse(raw);
+  }
   try {
     const data = await sbFetch('bd_leads?select=*&order=created_at.desc');
     return data || [];
@@ -71,30 +77,34 @@ async function getLeads() {
 }
 
 async function addLead(lead) {
+  if(sessionStorage.getItem('bd_token') === 'demo_token') {
+    const leads = JSON.parse(localStorage.getItem('bd_leads')||'[]');
+    lead.id = Date.now(); leads.unshift(lead);
+    localStorage.setItem('bd_leads', JSON.stringify(leads)); return lead;
+  }
   try {
     const data = await sbFetch('bd_leads', 'POST', lead);
     return Array.isArray(data) ? data[0] : data;
   } catch (e) {
     console.error('addLead error:', e.message);
-    // localStorage fallback
     const leads = JSON.parse(localStorage.getItem('bd_leads') || '[]');
-    lead.id = Date.now();
-    leads.unshift(lead);
-    localStorage.setItem('bd_leads', JSON.stringify(leads));
-    return lead;
+    lead.id = Date.now(); leads.unshift(lead);
+    localStorage.setItem('bd_leads', JSON.stringify(leads)); return lead;
   }
 }
 
 async function updateLead(id, patch) {
+  if(sessionStorage.getItem('bd_token') === 'demo_token') {
+    const leads = JSON.parse(localStorage.getItem('bd_leads')||'[]');
+    const i = leads.findIndex(l=>l.id==id);
+    if(i>-1){leads[i]={...leads[i],...patch,updated_at:new Date().toISOString()};localStorage.setItem('bd_leads',JSON.stringify(leads));return leads[i];}
+    return null;
+  }
   try {
-    const data = await sbFetch(`bd_leads?id=eq.${id}`, 'PATCH', {
-      ...patch,
-      updated_at: new Date().toISOString()
-    });
+    const data = await sbFetch(`bd_leads?id=eq.${id}`, 'PATCH', { ...patch, updated_at: new Date().toISOString() });
     return Array.isArray(data) ? data[0] : data;
   } catch (e) {
     console.error('updateLead error:', e.message);
-    // localStorage fallback
     const leads = JSON.parse(localStorage.getItem('bd_leads') || '[]');
     const i = leads.findIndex(l => l.id == id);
     if (i > -1) { leads[i] = { ...leads[i], ...patch, updated_at: new Date().toISOString() }; localStorage.setItem('bd_leads', JSON.stringify(leads)); return leads[i]; }
@@ -102,6 +112,10 @@ async function updateLead(id, patch) {
 }
 
 async function deleteLead(id) {
+  if(sessionStorage.getItem('bd_token') === 'demo_token') {
+    const leads = JSON.parse(localStorage.getItem('bd_leads')||'[]').filter(l=>l.id!=id);
+    localStorage.setItem('bd_leads', JSON.stringify(leads)); return;
+  }
   try {
     await sbFetch(`bd_leads?id=eq.${id}`, 'DELETE');
   } catch (e) {
@@ -112,16 +126,19 @@ async function deleteLead(id) {
 }
 
 async function bulkInsertLeads(leadsArray) {
+  if(sessionStorage.getItem('bd_token') === 'demo_token') {
+    const leads = JSON.parse(localStorage.getItem('bd_leads')||'[]');
+    leadsArray.forEach(l=>{l.id=Date.now()+Math.random();leads.unshift(l);});
+    localStorage.setItem('bd_leads',JSON.stringify(leads)); return leadsArray;
+  }
   try {
     const data = await sbFetch('bd_leads', 'POST', leadsArray);
     return data;
   } catch (e) {
     console.error('bulkInsert error:', e.message);
-    // localStorage fallback
     const leads = JSON.parse(localStorage.getItem('bd_leads') || '[]');
     leadsArray.forEach(l => { l.id = Date.now() + Math.random(); leads.unshift(l); });
-    localStorage.setItem('bd_leads', JSON.stringify(leads));
-    return leadsArray;
+    localStorage.setItem('bd_leads', JSON.stringify(leads)); return leadsArray;
   }
 }
 
