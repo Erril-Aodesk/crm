@@ -220,20 +220,29 @@ const user=getUser();
 document.getElementById('uN').textContent=user.name||'IT Admin';
 document.getElementById('avI').textContent=(user.name||'IT')[0].toUpperCase();
 
-let editId=null,detailId=null,importRows=[],curPage=1;
+let editId=null, detailId=null, importRows=[], curPage=1;
 const PER=15;
+let _leads = []; // ── cached leads array ──
 
 // Populate filters
 STAGES.forEach(s=>{['fltStIT','lf_st'].forEach(id=>{const o=document.createElement('option');o.value=s;o.textContent=s;document.getElementById(id).appendChild(o);});});
 SOURCES.forEach(s=>{['fltSrcIT','lf_src'].forEach(id=>{const o=document.createElement('option');o.value=s;o.textContent=s;document.getElementById(id).appendChild(o);});});
 INDUSTRIES.forEach(s=>{['fltIndIT','lf_ind'].forEach(id=>{const o=document.createElement('option');o.value=s;o.textContent=s;document.getElementById(id).appendChild(o);});});
 
+// ── LOAD & REFRESH ──
+async function loadLeads(){
+  showLoading('Loading leads...');
+  _leads = await getLeads();
+  hideLoading();
+  renderStats();
+  renderTable();
+}
+
 function renderStats(){
-  const leads=getLeads();
-  document.getElementById('stTotal').textContent=leads.length;
-  document.getElementById('stNew').textContent=leads.filter(l=>l.stage==='New Lead').length;
-  document.getElementById('stActive').textContent=leads.filter(l=>!['Closed Won','Closed Lost'].includes(l.stage)).length;
-  document.getElementById('stWon').textContent=leads.filter(l=>l.stage==='Closed Won').length;
+  document.getElementById('stTotal').textContent=_leads.length;
+  document.getElementById('stNew').textContent=_leads.filter(l=>l.stage==='New Lead').length;
+  document.getElementById('stActive').textContent=_leads.filter(l=>!['Closed Won','Closed Lost'].includes(l.stage)).length;
+  document.getElementById('stWon').textContent=_leads.filter(l=>l.stage==='Closed Won').length;
 }
 
 function renderTable(){
@@ -241,7 +250,7 @@ function renderTable(){
   const stF=document.getElementById('fltStIT').value;
   const srcF=document.getElementById('fltSrcIT').value;
   const indF=document.getElementById('fltIndIT').value;
-  let leads=getLeads();
+  let leads=[..._leads];
   if(stF) leads=leads.filter(l=>l.stage===stF);
   if(srcF) leads=leads.filter(l=>l.source===srcF);
   if(indF) leads=leads.filter(l=>l.industry===indF);
@@ -261,39 +270,83 @@ function renderTable(){
     <td style="font-size:11px;color:var(--muted)">${fmtDate(l.created_at)}</td>
     <td><button class="act-btn" onclick="openDetail(${l.id})">View</button><button class="act-btn" onclick="openEdit(${l.id})">Edit</button><button class="act-btn red" onclick="del(${l.id})">Del</button></td>
   </tr>`).join('');
-  const totalPg=Math.ceil(total/PER);
+  const totalPg=Math.ceil(total/PER)||1;
   document.getElementById('pgInfo').textContent=`Showing ${Math.min(start+1,total)}–${Math.min(start+PER,total)} of ${total}`;
   const pgc=document.getElementById('pgBtns'); pgc.innerHTML='';
   for(let i=1;i<=totalPg;i++){const b=document.createElement('button');b.className='pg-btn'+(i===curPage?' active':'');b.textContent=i;b.onclick=()=>{curPage=i;renderTable();};pgc.appendChild(b);}
 }
 
 function openAdd(){ editId=null; document.getElementById('mLeadT').textContent='Add New Lead'; clearForm(); openModal('mLead'); }
-function openEdit(id){ editId=id; document.getElementById('mLeadT').textContent='Edit Lead'; const l=getLeads().find(x=>x.id==id);if(!l)return;
-  document.getElementById('lf_co').value=l.company||'';document.getElementById('lf_ct').value=l.contact||'';document.getElementById('lf_em').value=l.email||'';document.getElementById('lf_ph').value=l.phone||'';
-  document.getElementById('lf_ind').value=l.industry||'';document.getElementById('lf_src').value=l.source||'';document.getElementById('lf_st').value=l.stage||'New Lead';
-  document.getElementById('lf_mt').value=l.meeting_type||'';document.getElementById('lf_md').value=l.meeting_date?new Date(l.meeting_date).toISOString().slice(0,16):'';
-  document.getElementById('lf_zl').value=l.zoom_link||'';document.getElementById('lf_no').value=l.notes||'';
+function openEdit(id){
+  editId=id;
+  const l=_leads.find(x=>x.id==id); if(!l)return;
+  document.getElementById('mLeadT').textContent='Edit Lead';
+  document.getElementById('lf_co').value=l.company||'';
+  document.getElementById('lf_ct').value=l.contact||'';
+  document.getElementById('lf_em').value=l.email||'';
+  document.getElementById('lf_ph').value=l.phone||'';
+  document.getElementById('lf_ind').value=l.industry||'';
+  document.getElementById('lf_src').value=l.source||'';
+  document.getElementById('lf_st').value=l.stage||'New Lead';
+  document.getElementById('lf_mt').value=l.meeting_type||'';
+  document.getElementById('lf_md').value=l.meeting_date?new Date(l.meeting_date).toISOString().slice(0,16):'';
+  document.getElementById('lf_zl').value=l.zoom_link||'';
+  document.getElementById('lf_no').value=l.notes||'';
   openModal('mLead');
 }
 function editFromDetail(){ closeModal('mDetail'); openEdit(detailId); }
 function clearForm(){ ['lf_co','lf_ct','lf_em','lf_ph','lf_md','lf_zl','lf_no'].forEach(id=>document.getElementById(id).value='');['lf_ind','lf_src','lf_mt'].forEach(id=>document.getElementById(id).value='');document.getElementById('lf_st').value='New Lead'; }
-function saveLead(){
-  const co=document.getElementById('lf_co').value.trim(),ct=document.getElementById('lf_ct').value.trim();
+
+async function saveLead(){
+  const co=document.getElementById('lf_co').value.trim(), ct=document.getElementById('lf_ct').value.trim();
   if(!co||!ct){showToast('Company and contact required','error');return;}
-  const data={company:co,contact:ct,email:document.getElementById('lf_em').value.trim(),phone:document.getElementById('lf_ph').value.trim(),
-    industry:document.getElementById('lf_ind').value,source:document.getElementById('lf_src').value,stage:document.getElementById('lf_st').value||'New Lead',
-    meeting_type:document.getElementById('lf_mt').value||null,meeting_date:document.getElementById('lf_md').value?new Date(document.getElementById('lf_md').value).toISOString():null,
-    zoom_link:document.getElementById('lf_zl').value.trim()||null,notes:document.getElementById('lf_no').value.trim(),bdm_notes:'',
-    created_by:user.email||'it@aodesk.com.au'};
-  if(editId){updateLead(editId,data);showToast(`"${co}" updated ✅`);}
-  else{addLead({...data,created_at:new Date().toISOString(),updated_at:new Date().toISOString()});showToast(`"${co}" added ✅`);}
-  closeModal('mLead');renderStats();renderTable();
+  const data={
+    company:co, contact:ct,
+    email:document.getElementById('lf_em').value.trim(),
+    phone:document.getElementById('lf_ph').value.trim(),
+    industry:document.getElementById('lf_ind').value,
+    source:document.getElementById('lf_src').value,
+    stage:document.getElementById('lf_st').value||'New Lead',
+    meeting_type:document.getElementById('lf_mt').value||null,
+    meeting_date:document.getElementById('lf_md').value?new Date(document.getElementById('lf_md').value).toISOString():null,
+    zoom_link:document.getElementById('lf_zl').value.trim()||null,
+    notes:document.getElementById('lf_no').value.trim(),
+    bdm_notes:'',
+    created_by:user.email||'it@aodesk.com.au'
+  };
+  showLoading(editId?'Updating...':'Saving...');
+  if(editId){
+    const updated = await updateLead(editId, data);
+    const i = _leads.findIndex(l=>l.id==editId);
+    if(i>-1) _leads[i]={..._leads[i],...data,...updated};
+    showToast(`"${co}" updated ✅`);
+  } else {
+    const saved = await addLead({...data, created_at:new Date().toISOString(), updated_at:new Date().toISOString()});
+    _leads.unshift(saved||data);
+    showToast(`"${co}" added ✅`);
+  }
+  hideLoading();
+  closeModal('mLead');
+  renderStats();
+  renderTable();
 }
-function del(id){const l=getLeads().find(x=>x.id==id);if(!confirm(`Delete "${l?.company}"?`))return;deleteLead(id);renderStats();renderTable();showToast('Lead deleted');}
-function delFromDetail(){closeModal('mDetail');del(detailId);}
+
+async function del(id){
+  const l=_leads.find(x=>x.id==id);
+  if(!confirm(`Delete "${l?.company}"? This cannot be undone.`)) return;
+  showLoading('Deleting...');
+  await deleteLead(id);
+  _leads=_leads.filter(l=>l.id!=id);
+  hideLoading();
+  renderStats();
+  renderTable();
+  showToast('Lead deleted');
+}
+function delFromDetail(){ closeModal('mDetail'); del(detailId); }
 
 function openDetail(id){
-  detailId=id; const l=getLeads().find(x=>x.id==id);if(!l)return;
+  detailId=id;
+  const l=_leads.find(x=>x.id==id); if(!l)return;
   document.getElementById('detailBody').innerHTML=`
     <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px">
       <div><div class="mt">${l.company}</div><div class="ms">${l.contact} · ${l.email||''}</div></div>${stageBadge(l.stage)}</div>
@@ -310,7 +363,7 @@ function openDetail(id){
   openModal('mDetail');
 }
 
-// IMPORT
+// ── IMPORT ──
 function openImport(){ importRows=[];document.getElementById('importPreview').style.display='none';document.getElementById('importBtn').style.display='none';openModal('mImport'); }
 function handleDrop(e){ e.preventDefault();document.getElementById('dropZone').classList.remove('drag');const f=e.dataTransfer.files[0];if(f)handleFile(f); }
 function handleFile(file){
@@ -319,11 +372,11 @@ function handleFile(file){
     const wb=XLSX.read(e.target.result,{type:'binary'});
     const ws=wb.Sheets[wb.SheetNames[0]];
     importRows=XLSX.utils.sheet_to_json(ws,{defval:''});
-    const head=document.getElementById('prevHead');head.innerHTML='';
-    const body=document.getElementById('prevBody');body.innerHTML='';
+    const head=document.getElementById('prevHead'); head.innerHTML='';
+    const body=document.getElementById('prevBody'); body.innerHTML='';
     if(importRows.length){
       Object.keys(importRows[0]).forEach(k=>{const th=document.createElement('th');th.textContent=k;th.style.cssText='padding:6px 10px;white-space:nowrap;';head.appendChild(th);});
-      importRows.slice(0,5).forEach(r=>{const tr=document.createElement('tr');Object.values(r).forEach(v=>{const td=document.createElement('td');td.textContent=v;td.style.cssText='padding:6px 10px;border-top:1px solid #eee;';tr.appendChild(td);});body.appendChild(tr);});
+      importRows.slice(0,5).forEach(row=>{const tr=document.createElement('tr');Object.values(row).forEach(v=>{const td=document.createElement('td');td.textContent=v;td.style.cssText='padding:6px 10px;border-top:1px solid #eee;';tr.appendChild(td);});body.appendChild(tr);});
     }
     document.getElementById('importCount').textContent=`${importRows.length} rows found.`;
     document.getElementById('importPreview').style.display='block';
@@ -331,26 +384,29 @@ function handleFile(file){
   };
   r.readAsBinaryString(file);
 }
-function doImport(){
-  if(!importRows.length)return;
-  const leads=getLeads();
+async function doImport(){
+  if(!importRows.length) return;
   const M={company:['company','Company','company name','Company Name'],contact:['contact','Contact','contact person','Contact Person','name','Name'],email:['email','Email'],phone:['phone','Phone','mobile','Mobile'],industry:['industry','Industry'],source:['source','Source','lead source','Lead Source'],stage:['stage','Stage'],notes:['notes','Notes']};
   function get(row,keys){for(const k of keys){if(row[k]!==undefined&&row[k]!=='')return String(row[k]);}return '';}
   const now2=new Date().toISOString();
-  let count=0;
+  const batch=[];
   importRows.forEach(row=>{
-    const co=get(row,M.company);if(!co)return;
+    const co=get(row,M.company); if(!co)return;
     const stage=get(row,M.stage)||'New Lead';
-    leads.unshift({id:Date.now()+Math.random(),company:co,contact:get(row,M.contact)||'—',email:get(row,M.email),phone:get(row,M.phone),industry:get(row,M.industry),source:get(row,M.source),stage:STAGES.includes(stage)?stage:'New Lead',notes:get(row,M.notes),meeting_type:null,meeting_date:null,zoom_link:null,bdm_notes:'',created_by:'it-import',created_at:now2,updated_at:now2});
-    count++;
+    batch.push({company:co,contact:get(row,M.contact)||'—',email:get(row,M.email),phone:get(row,M.phone),industry:get(row,M.industry),source:get(row,M.source),stage:STAGES.includes(stage)?stage:'New Lead',notes:get(row,M.notes),meeting_type:null,meeting_date:null,zoom_link:null,bdm_notes:'',created_by:'it-import',created_at:now2,updated_at:now2});
   });
-  saveLeads(leads);renderStats();renderTable();closeModal('mImport');showToast(`${count} leads imported ✅`);
+  showLoading(`Importing ${batch.length} leads...`);
+  await bulkInsertLeads(batch);
+  await loadLeads();
+  closeModal('mImport');
+  showToast(`${batch.length} leads imported ✅`);
 }
 
 function showTab(tab,el){document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));if(el)el.classList.add('active');}
-
 document.querySelectorAll('.ov').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('show');}));
-renderStats();renderTable();
+
+// ── INIT ──
+loadLeads();
 </script>
 </body>
 </html>
